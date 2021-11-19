@@ -1,0 +1,21 @@
+ 
+Input file                : Vol30.crd
+Number of atoms (balls)   : 30
+Probe radius              : 0
+ 
+Delaunay compute time: 0.000134 seconds
+AlphaCx compute time : 4.7e-05 seconds
+Volumes compute time : 6.5e-05 seconds
+ 
+Biomolecule from file      : Vol30.crd
+Number of atoms (balls)    : 30
+Probe radius               : 0
+Unweighted surface area    :     444.17577880
+Weighted surface area      :     444.17577880
+Unweighted volume          :     395.87067291
+Weighted volume            :     395.87067291
+Unweighted mean curvature  :       9.85699470
+Weighted mean curvature    :       9.85699470
+Unweighted Gauss curvature :      12.56637061
+Weighted Gauss curvature   :      12.56637061
+ 

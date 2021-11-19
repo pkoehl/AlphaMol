@@ -1,0 +1,21 @@
+ 
+Input file                : Vol4.crd
+Number of atoms (balls)   : 4
+Probe radius              : 0
+ 
+Delaunay compute time: 8.4e-05 seconds
+AlphaCx compute time : 1e-05 seconds
+Volumes compute time : 3.8e-05 seconds
+ 
+Biomolecule from file      : Vol4.crd
+Number of atoms (balls)    : 4
+Probe radius               : 0
+Unweighted surface area    :      29.24866298
+Weighted surface area      :      29.24866298
+Unweighted volume          :      12.47766970
+Weighted volume            :      12.47766970
+Unweighted mean curvature  :      12.29002420
+Weighted mean curvature    :      12.29002420
+Unweighted Gauss curvature :      12.56637061
+Weighted Gauss curvature   :      12.56637061
+ 

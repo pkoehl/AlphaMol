@@ -1,0 +1,982 @@
+% Weighted intrinsic volumes of a spacefill diagram
+% Surface Area, Volume, Mean curvature, and Gaussian Curvature
+%
+% Follow up of the work of Arsenyi Akopyan and Herbert Edelsbrunner
+%
+% Re-derive all expression using intrinsic geometry (internal distances) only
+% First version by Patrice, February 2020
+%
+
+\documentclass[11 pt]{article}
+
+\setlength{\textwidth}{6.in}
+\addtolength{\oddsidemargin}{-0.3in}
+\setlength{\topmargin}{-0.8in}
+\setlength{\textheight}{9in}
+
+%\usepackage[acmtitlespace,nocopyright]{acmnew}
+\usepackage{times}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{theorem}
+\usepackage{threeparttable}
+\usepackage{multirow}
+\usepackage{cite}
+\usepackage{color}
+
+\newcommand {\mm}[1] {\ifmmode{#1}\else{\mbox{\(#1\)}}\fi}
+\newcommand {\spc} {\makebox[1em]{ }}
+\newcommand {\ceiling}[1] {{\left\lceil  #1 \right\rceil}}
+\newcommand {\floor}[1] {{\left\lfloor #1 \right\rfloor}}
+\newcommand {\scalprod}[2] {{\langle #1 , #2 \rangle}}
+\newcommand{\denselist}{\itemsep 0pt\parsep=1pt\partopsep 0pt }
+%\renewcommand{\labelitemi}{ }
+
+\theoremstyle{plain} \theorembodyfont{\rmfamily}
+\newtheorem{Thm}{Thm.}[section]
+\newtheorem{Lemma}{Lemma}[section]
+\newtheorem{Cor}{Corollary}[section]
+\newtheorem{Ass}{Assumption}[section]
+
+\newcommand{\proof}{\noindent{\sc Proof.~}}
+\newcommand{\bigO}{\rm O}
+\newcommand{\eop}{\hfill\usebox{\smallProofsym}\bigskip}  %
+\newsavebox{\smallProofsym}                            % smallproofsymbol
+\savebox{\smallProofsym}                               %
+{%                                                     %
+\begin{picture}(6,6)                                   %
+\put(0,0){\framebox(6,6){}}                            %
+\put(0,2){\framebox(4,4){}}                            %
+\end{picture}                                          %
+}                                                      %
+
+%% This makes the legend font small
+\makeatletter
+\long\def\@makecaption#1#2{%
+  \vskip\abovecaptionskip
+  \sbox\@tempboxa{\small #1: #2}%
+  \ifdim \wd\@tempboxa >\hsize
+    \small #1: #2\par
+  \else
+    \global \@minipagefalse
+    \hb@xt@\hsize{\hfil\box\@tempboxa\hfil}%
+  \fi
+  \vskip\belowcaptionskip}
+\makeatother
+
+\newcommand{\Rspace}        {\mm{{\mathbb R}}}
+\newcommand{\tsx}           {\mm{\tau}}
+\newcommand{\usx}           {\mm{\upsilon}}
+
+\newcommand{\AAA}           {\mm{\bf a}}
+\newcommand{\TTT}           {\mm{\bf t}}
+\newcommand{\VVV}           {\mm{\bf v}}
+\newcommand{\MMM}           {\mm{\bf m}}
+\newcommand{\GGG}           {\mm{\bf g}}
+\newcommand{\ZZZ}           {\mm{\bf z}}
+
+\newcommand{\capsp}         {{\; \cap \;}}
+\newcommand{\cupsp}         {{\; \cup \;}}
+\newcommand{\norm}[1]       {\mm{\|{#1}\|}}
+\newcommand{\dist}[2]       {\mm{\|{#1}-{#2}\|}}
+\newcommand{\dista}[2]       {\mm{|{#1}-{#2}|}}
+\newcommand{\wdist}[1]      {\mm{\pi_{#1}}}
+\newcommand{\aff}[1]        {\mm{\rm aff\,}{#1}}
+\newcommand{\conv}[1]       {\mm{\rm conv\,}{#1}}
+\newcommand{\bd}[1]         {\mm{\rm bd\,}{#1}}
+\newcommand{\dime}[1]       {\mm{\rm dim\,}{#1}}
+\newcommand{\card}[1]       {\mm{\rm card\,}{#1}}
+
+\newcommand{\St}[1]         {\mm{\rm St\,}{#1}}
+\newcommand{\Lk}[1]         {\mm{\rm Lk\,}{#1}}
+\newcommand{\length}        {\mm{\rm length}}
+\newcommand{\area}          {\mm{\rm A}}
+\newcommand{\dihed}           {\mm{\rm dihed}}
+\newcommand{\Volume}[1]     {\mm{\rm vol\,}{#1}}
+\newcommand{\Area}[1]       {\mm{\rm area\,}{#1}}
+\newcommand{\Deter}[1]       {\mm{\rm det\,}{#1}}
+\newcommand{\Trace}[1]       {\mm{\rm Tr\,}{#1}}
+\newcommand{\Ad}            {\mm{\rm \; and \;}}
+\newcommand{\upbar}         {\mm{\rm \; | \;}}
+
+\newcommand{\Diff}          {\mm{\rm D}}
+\newcommand{\diff}          {\mm{\rm d}}
+
+\newcommand{\Remark}[1]     {{\sf [#1]}}
+\newcommand{\Sf}[1]         {{\small {\sf #1}}}
+
+% For generating PDF
+%\ifx\pdfoutput\undefined
+%\usepackage[dvips]{graphicx}
+%\else
+\usepackage[pdftex]{graphicx}
+%\usepackage{thumbpdf}
+%\fi
+
+\newcommand{\centerfig}[2]{%
+\centerline{\includegraphics[#2]{Figures/#1}}
+}
+
+
+\title{Weighted Intrinsic Volumes of a Space-Filling Diagram and their derivatives: \\Surface Area, Volume, Mean and Gaussian Curvatures}
+
+\author{Arsenyi Akopyan, Herbert Edelsbrunner,\\
+            IST Austria, \\
+            Klosterneuburg, Austria, \\
+                 e-mail: akopjan@gmail.com, edels@ist.ac.at,\\ \\
+        \and Patrice Koehl\\
+            Department of Computer Science, \\
+            University of California, Davis, CA 95616.\\
+                 e-mail: koehl@cs.ucdavis.edu
+        }
+
+\begin{document}
+\maketitle
+
+\newpage
+
+%%
+%% Abstract 
+%%
+%\begin{abstract}
+%{\rm
+%}
+%\end{abstract}
+
+%\vspace{0.1in}
+%{\small
+% \noindent{\bf Keywords.}
+%  space-filling diagrams, intrinsic volumes,
+%  surface area, volume, mean curvature, Gaussian curvature, 
+%  derivatives, macromolecules.
+%}
+
+%\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\label{sec1}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Edelsbrunner and colleagues have developed analytical methods based on the alpha shape theory for
+computing the measures of a union of balls, including surface area, volume, mean curvature, Gaussian curvature, and their 
+derivatives with respect to the Cartesian coordinates of the centers of the balls \cite{Ede95, EdKo03, BEKL04, EdKo05, AkEd19a, AkEd19b}.
+
+In this paper we propose new geometric derivations of the corresponding equations that only requires knowledge of the radii of the balls and of the distances between their centers (i.e. only intrinsic geometry). We also compute the derivatives of these measures with respect to these distances, from which the Cartesian derivatives are easily derived.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Measuring Union of Balls}
+\label{sec2}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{A simplified inclusion-exclusion formula for unions of balls}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The Alpha Shape Theory provides a method for reducing significantly the number of terms in the inclusion-exclusion formula applied to unions of balls.
+It is based on the concept of Voronoi decompositions and Delaunay triangulations
+and their filtrations, as described by Edelsbrunner \cite{Ede95}. 
+Note that the concept of using the Voronoi decomposition and Delaunay triangulation to simplify the inclusion-exclusion formula was originally introduced by Naiman and Wynn \cite{NaWy92}.
+
+\paragraph{Voronoi decomposition and dual complex.}
+Let us consider a finite set of spheres $S_i$ with centers $z_i$
+and radii $r_i $ and let $B_i$ be the ball bounded by $S_i$.
+We define the square distance between a point $x$
+and a sphere $S_i$ as $\pi_i (x) = \dist{x}{z_i}^2 - r_i^2$.
+This distance definition allows for varying radii for the spheres.
+
+
+The \emph{Voronoi region} of $S_i$ consists of all points $x$
+at least as close to $S_i$ as to any other sphere:
+$V_i  =  \{ x \in \Rspace^3  \mid  \pi_i (x) \leq \pi_j (x) \}$.
+The Voronoi region of $S_i$ is a convex polyhedron obtained as the
+common intersection of finitely many closed half-spaces,
+one per sphere $S_j \neq S_i$. These half-spaces are defined as follows.
+If $S_i$ and $S_j$ intersect in a circle then the plane bounding
+the corresponding half-spaces passes through that circle.
+The union of all Voronoi regions $V_i$ defines the \emph{Voronoi diagram} of the union of spheres;
+this union covers the whole space.
+The intersection of the Voronoi diagram with the union of balls $B_i$
+decomposes this union into convex regions of
+the form $B_i \capsp V_i$, as illustrated in figure \ref{fig:dualcomplex}.
+The boundary of each such region consists of spherical patches on $S_i$
+and planar patches on the boundary of $V_i$.
+The spherical patches separate the inside from the outside and
+the planar patches decompose the inside of the union.
+
+The \emph{Delaunay triangulation} is the dual of the Voronoi diagram,
+obtained by drawing an edge between the centers of $S_i$ and $S_j$
+if the two corresponding Voronoi regions share a common face.
+Furthermore, we draw a triangle connecting $z_i$, $z_j$ and $z_k$ if
+$V_i$, $V_j$ and $V_k$ intersect in a common line segment,
+and we draw a tetrahedron connecting $z_i$, $z_j$, $z_k$ and $z_\ell$
+if $V_i$, $V_j$, $V_k$ and $V_\ell$ meet at a common point.
+Assuming general position of the spheres, there are no other cases
+to be considered.
+We refer to this as the \emph{generic case}; it is important to mention that it is rare
+in practice because of limited precision.
+Nevertheless, it is possible to simulate a perturbation of the union of balls
+that restores the generic case \cite{EdMu90}.
+This method, referred to as \emph{simulation of simplicity},
+consistently unfolds potentially complicated degenerate cases to non-degenerate ones.
+
+Let us limit the construction of the Delaunay triangulation to within
+the union of balls.
+In other words, we draw a dual edge between the two vertices $z_i$ and $z_j$ only if
+$B_i \capsp V_i$ and $B_j \capsp V_j$ share a common face,
+and similarly for triangles and tetrahedra.
+The result is a sub-complex of the Delaunay triangulation which we refer
+to as the \emph{dual complex} $K$ of the set of spheres.
+
+
+\paragraph{Area, volume, and curvatures formulas.}
+A simplex $\tsx$ in the dual complex can be interpreted abstractly
+as a collection of balls, one ball if it is a vertex, two if it is an edge, etc. 
+In this interpretation, the dual complex is a system of sets of balls.
+We write $\Volume{\bigcap \tsx}$ for the volume of the intersection of the balls in $\tsx$.
+This is exactly the term we would see in an inclusion-exclusion formula
+for the volume of the union of balls, $\bigcup_i B_i$.
+As proved in \cite{NaWy92, Ede95}, the inclusion-exclusion formula that corresponds to the dual complex gives the correct volume of a union of balls, as well as the correct area of its boundary.
+
+We state the corresponding theorems for the case in which the contribution of each ball $B_i$ is weighted by a constant $\alpha_i$, yielding the weighted volume $\mathcal{V}_W$ of the union of balls, weighted area $\mathcal{A}_W$ of its boundary, and weighted mean curvature $\mathcal{M}_W$  and Gaussian curvature $\mathcal{G}_W$  integrated over this boundary .  Note that we use the same coefficients $\alpha_i$ for all four intrinsic volumes of the union of balls but that it would be trivial to consider a different set of coefficients for each.
+Let $\tsx_i$ be the simplex corresponding to the ball $B_i$, $\tsx_{ij}$ the simplex formed by the edge between the balls $B_i$ and $B_j$, $\tsx_{ijk}$ the triangle
+corresponding the the three balls $B_i$, $B_j$ and $B_k$, and finally $\tsx_{ijkl}$ the tetrahedron
+defined by the four balls $B_i$, $B_j$, $B_k$ and $B_l$. then:
+
+\begin{description}
+  \item[{\sc Weighted Area Theorem}]
+    \begin{eqnarray}
+    \mathcal{A}_W(\bigcup_i B_i) &=& \sum_{\tsx_i \in K} \alpha_i \left(\mathcal{A}_i
+    - \sum_{j | \tsx_{ij} \in K} \mathcal{A}_{i;j} 
+    + \sum_{(j,k) | \tsx_{ijk} \in K}  \mathcal{A}_{i;jk}  - \sum_{(j,k,l) | \tsx_{ijkl} \in K} \mathcal{A}_{i;jkl} \right) \nonumber \\
+          \label{eqn:wsurf}
+          \end{eqnarray}
+\end{description}
+\begin{description}
+  \item[{\sc Weighted Volume Theorem}]
+    \begin{eqnarray}
+    \mathcal{V}_W(\bigcup_i B_i) &=& \sum_{\tsx_i \in K} \alpha_i \left( \mathcal{V}_i
+    - \sum_{j | \tsx_{ij} \in K} \mathcal{V}_{i;j} 
+    + \sum_{(j,k) | \tsx_{ijk} \in K} \mathcal{V}_{i;jk}  - \sum_{(j,k,l) | \tsx_{ijkl} \in K} \mathcal{V}_{i;jkl} \right) \nonumber \\
+          \label{eqn:wvol}
+          \end{eqnarray}
+\end{description}
+\begin{description}
+  \item[{\sc Weighted Mean Curvature Theorem}]
+    \begin{eqnarray}
+    \mathcal{M}_W(\bigcup_i B_i) &=& \sum_{\tsx_i \in K} \frac{\alpha_i}{r_i} \left(\mathcal{A}_i
+    - \sum_{i | \tsx_{ij} \in K} \mathcal{A}_{i;j} 
+    + \sum_{(j,k) | \tsx_{ijk} \in K}  \mathcal{A}_{i;jk}  - \sum_{(j,k,l) | \tsx_{ijkl} \in K} \mathcal{A}_{i;jkl} \right) \nonumber \\
+    &-&  \pi \sum_{\tsx_{ij} \in K} (\alpha_i+\alpha_j) \sigma_{ij} \varphi_{ij} r_{i:j}
+          \label{eqn:wmean}
+          \end{eqnarray}
+\end{description}
+\begin{description}
+  \item[{\sc Weighted Gaussian Curvature Theorem}]
+    \begin{eqnarray}
+    \mathcal{G}_W(\bigcup_i B_i) &=& \sum_{\tsx_i \in K} \frac{\alpha_i}{r_i^2} \left(\mathcal{A}_i
+    - \sum_{j | \tsx_{ij} \in K} \mathcal{A}_{i;j} 
+    + \sum_{(j,k) | \tsx_{ijk} \in K}  \mathcal{A}_{i;jk}  - \sum_{(j,k,l) | \tsx_{ijkl} \in K} \mathcal{A}_{i;jkl} \right) \nonumber \\
+    &-&  \pi \sum_{\tsx_{ij} \in K} (\alpha_i+\alpha_j) \sigma_{ij} \lambda_{ij} \nonumber \\
+    &+& 2 \sum_{\tsx_{ijk} \in K} \gamma_{ijk} (\alpha_i \sigma_{i:jk} + \alpha_j \sigma_{j:ki} + \alpha_k \sigma_{k: ij} )  \nonumber \\
+          \label{eqn:wgauss}
+          \end{eqnarray}
+\end{description}
+
+Here $\mathcal{V}_i$ is the volume of the ball $B_i$,
+$\mathcal{V}_{i;j}$ is the contribution of $B_i$ to the volume of the intersection of the balls $B_i$ and
+$B_j$, etc. Similar definitions are used for the surface areas $\mathcal{A}$.  
+The weighted mean curvature and weighted Gaussian curvature theorems introduce the new variables $\phi_{ij}$, the angle between the unit normals of the spheres $S_i$ and $S_j$ at a point of their circle $S_{ij}$, of intersection, $S_{ij}$, $r_{i:j}$, the radius of that circle, $\lambda_{ij}$, the combined length of the two normals after projection on the line joining the centers of $S_i$ and $S_j$, $\sigma_{ij}$, the fraction of the length of $S_{ij}$ that is accessible, $\gamma_{ijk}$ (=0, 0.5, or 1), half the number of tetrahedra in $K$ that are incident to the triangle $\tsx_{ijk}$ in $K$, and $\sigma_{i:jk}$, the fraction associated with $i$ of the surface area of the spherical triangles formed by the unit normals of the spheres $S_i$, $S_j$, $S_k$ at one of the two points at which they intersect. Expression for those variables and their derivatives with respect to edge lengths in the complex $K$ are described in details below.
+
+The weighted area and weighted volume theorems are direct extensions of the Area and Volume Theorems derived by Edelsbrunner \cite{Ede95, EdKo05}; 
+The weighted mean curvature and weighted Gaussian curvature theorem were recently described in details by Akopyan and Edelsbrunner \cite{AkEd19a, AkEd19b}.
+The weighted mean curvature formula includes two terms: the contribution of the spherical patches, and the contribution of the accessible spherical arcs at the intersections of two spheres. Note that the coefficient $\pi$ in from of the second term differs from the coefficient $\pi/2$ in the similar formula in reference \cite{AkEd19a}: the former involves a sum over unordered pairs $(i,j)$ (i.e. the edges in the dual complex), while the former includes a sum over ordered pairs $(i,j)$. The contribution of an arc is divided equally between the two spheres involved (see \cite{AkEd19a}).
+In parallel, the weighted Gaussian curvature formula includes three terms: the contribution of the spherical patches, the contribution of the spherical arcs at the intersections of two spheres, and the contribution of the accessible corners at the intersection of three spheres. Note that the latter has a coefficient of $2$, as three spheres intersect at two corners that contribute equally. The contribution of a corner is divided among the corresponding three spheres: this will be described in details below. Note again the difference in coefficients of the contribution of corners with \cite{AkEd19b}, as we consider here unordered triplets $(i,j,k)$, while \cite{AkEd19b} considered ordered triplets.
+
+As a side note, it is interesting that the dual complex is not the only simplicial complex
+that leads to a minimal inclusion-exclusion formula: Attali and Edelsbrunner have shown that
+it is possible to construct a family of such complexes, that are characterized by the independence
+of their simplices and by geometric realizations with the same underlying space as the dual complex \cite{AtEd07}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Angle weighted inclusion-exclusion formula for unions of balls}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Even though the equations described above are minimal, i.e. they only consider up to four levels in the inclusion-exclusion formula, it is possible to find even shorter expressions for the weighted areas and volumes if non-integer coefficients are considered. This is what is referred to as the short inclusion-exclusion method and is described in detail in \cite{Ede95}.  In this method, the areas and volumes are expressed as the sums of the contributions of intersections of at most three balls, with angular coefficients.  Let $F_i$ be the fraction of the Voronoi region of $S_i$ delimited by the planes defined by the triangles $\Delta z_iz_jz_k$, $\Delta z_iz_jz_l$ and $\Delta z_iz_kz_l$. The expressions for the weighted intrinsic volumes are then given by:
+
+\begin{description}
+  \item[{\sc Short Weighted Area Theorem}]
+   \begin{eqnarray}
+    \mathcal{A}_W(\bigcup_i B_i) &=& \sum_{\tsx_i \in K} \alpha_i \left(\gamma_i \mathcal{A}_i
+   - \sum_{j | \tsx_{ij} \in K} \gamma_{ij} \mathcal{A}_{i;j} 
+    + \sum_{(j,k) | \tsx_{ijk} \in K}  \gamma_{ijk} \mathcal{A}_{i;jk} \right) \nonumber \\
+          \label{eqn:wsurf2}
+          \end{eqnarray}
+\end{description}
+\begin{description}
+  \item[{\sc Short Weighted Volume Theorem}]
+    \begin{eqnarray}
+    \mathcal{V}_W(\bigcup_i B_i) &=& \sum_{\tsx_i \in K} \alpha_i \left( \gamma_{i} \mathcal{V}_i
+    - \sum_{j | \tsx_{ij} \in K} \gamma_{ij} \mathcal{V}_{i;j} 
+    + \sum_{(j,k) | \tsx_{ijk} \in K} \gamma_{ijk} \mathcal{V}_{i;jk}  +\sum_{(j,k,l) | \tsx_{ijkl} \in K} \Volume{(F_i)} \right) \nonumber \\
+          \label{eqn:wvol2}
+         \end{eqnarray}
+\end{description}
+\begin{description}
+  \item[{\sc Short Weighted Mean Curvature Theorem}]
+    \begin{eqnarray}
+    \mathcal{M}_W(\bigcup_i B_i) &=& \sum_{\tsx_i \in K} \frac{\alpha_i}{r_i} \left(\gamma_i \mathcal{A}_i
+   - \sum_{j | \tsx_{ij} \in K} \gamma_{ij} \mathcal{A}_{i;j} 
+    + \sum_{(j,k) | \tsx_{ijk} \in K}  \gamma_{ijk} \mathcal{A}_{i;jk} \right) \nonumber \\    
+    &-&  \pi \sum_{\tsx_{ij} \in K} (\alpha_i+\alpha_j) \sigma_{ij} \varphi_{ij} r_{i:j}
+          \label{eqn:wmean2}
+          \end{eqnarray}
+\end{description}
+\begin{description}
+  \item[{\sc Short Weighted Gaussian Curvature Theorem}]
+    \begin{eqnarray}
+\mathcal{G}_W(\bigcup_i B_i) &=& \sum_{\tsx_i \in K} \frac{\alpha_i}{r_i} \left(\gamma_i \mathcal{A}_i
+    - \sum_{j | \tsx_{ij} \in K} \gamma_{ij} \mathcal{A}_{i;j} 
+    + \sum_{(j,k) | \tsx_{ijk} \in K}  \gamma_{ijk} \mathcal{A}_{i;jk} \right) \nonumber \\    
+    &-&  \pi \sum_{\tsx_{ij} \in K} (\alpha_i+\alpha_j) \sigma_{ij} \lambda_{ij} \nonumber \\
+   &+& 2 \sum_{\tsx_{ijk} \in K} \gamma_{ijk} (\alpha_i \sigma_{i:jk} + \alpha_j \sigma_{j:ki} + \alpha_k \sigma_{k: ij} ) \nonumber \\
+         \label{eqn:wgauss2}
+          \end{eqnarray}
+\end{description}
+
+All edges and triangles that are fully buried have zero contribution in equations \ref{eqn:wsurf2} and \ref{eqn:wvol2}. In parallel, tetrahedra in the dual complex that are fully buried do not contribute to the area, mean curvature, and Gaussian curvature and only contribute their volume (or fraction of, as defined by $\Volume{F_i}$) in the short weighted volume formula. 
+Computing the volumes of the regions $F_i$ is easier than computer the volume of the intersection of four spheres. We show in appendix A how to compute this volume.
+
+The coefficients $\gamma$ are the normalized exposed angles of the simplices \cite{EdKo05}; they integrate the contributions of the tetrahedra of the dual complex.
+They can be expressed as the fraction of solid angle (for a vertex), of dihedral angle (for an edge) or face of triangle that remains accessible in the dual complex.
+If we define $\Omega_{i:jkl}$ as the solid angle at vertex $z_i$ and $\phi_{ij; kl}$ as the dihedral angle associated with the edge $z_iz_j$ in the tetrahedron defined by $z_i, z_j, z_k$ and $z_l$, the coefficients $\gamma$ are then given by:
+ \begin{eqnarray}
+ \gamma_i &=& 1 - \sum_{j,k,l \mid \tsx_{ijkl} \in K} \frac{\Omega_{i:jkl}}{4\pi} \\
+ \gamma_{ij} &=& 1 - \sum_{k,l \mid \tsx_{ijkl} \in K} \frac{\phi_{ij:kl}}{2\pi} \\
+ \label{eqn:gammaij}
+ \gamma_{ijk} &=& 1 - \sum_{l \mid \tsx_{ijkl} \in K} \frac{1}{2}
+ \label{eqn:gammaijk}
+ \end{eqnarray}
+  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Intrinsic volume derivatives}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+We are interested in the derivatives of the intrinsic volumes (surface area, volume, mean and Gaussian curvatures) of a union
+of $N$ balls with respect to the positions of their centers.
+Expressions for these derivatives with respect to the Cartesian coordinates of the center of the balls are available for the surface area \cite{BEKL04}, for the volume \cite{EdKo03}, for the mean curvature \cite{AkEd19a}, and for the Gaussian curvatures \cite{AkEd19b}.  
+We revisit this problem here and propose new expressions for the derivatives with respect to the distances between the center of these balls; these distances represent internal coordinates for the system that are invariant under rigid body transformations (rotations and translations).
+
+\paragraph{Derivatives with respect to internal distances.}
+
+The volume of a union of balls and area of its boundary are fully characterized by the simplified, angle-weighted inclusion-exclusion equations \ref{eqn:wvol2} and \ref{eqn:wsurf2}, respectively.  In the following section, we will show that all terms included in these two formulas can be expressed as functions of the radii of the balls and the distances between their centers.  We compute the derivatives of the volume and area with respect to these distances algebraically. Note that the derivatives with respect to the distance $r_{ab}$
+between the centers $z_a$ and $z_b$ of the two balls $B_a$ and $B_b$ is non zero if and only if the
+edge $z_a z_b$ belongs to the dual complex. We get:
+
+\begin{description}
+  \item[{\sc Weighted Area Derivative Theorem}]
+    \begin{eqnarray}
+    \frac{\delta \mathcal{A}_W}{\delta r_{ab}}  &=&\sum_{\tsx{i} \in K} \alpha_i \mathcal{A}_i \frac{\delta \gamma_i}{\delta r_{ab}}   - \gamma_{ab} \alpha_a \frac{\delta\mathcal{A}_{a;b}}{\delta r_{ab}} - \gamma_{ab} \alpha_b \frac{\delta \mathcal{A}_{b;a}}{\delta r_{ab}}  
+    - \sum_{ \tsx_{ij} \in K} \frac{\delta \gamma_{ij}}{\delta  r_{ab}}  (\alpha_i \mathcal{A}_{i;j} + \alpha_j \mathcal{A}_{j;i}) \nonumber \\
+  &&  + \sum_{i \mid \tsx_{abi} \in K} \gamma_{abi} \left(\alpha_a \frac{\delta \mathcal{A}_{a;bi}}{\delta r_{ab}} + \alpha_b \frac{\delta \mathcal{A}_{b;ai}}{\delta r_{ab}}+ \alpha_i \frac{\delta \mathcal{A}_{i;ab}}{\delta r_{ab}} \right) 
+          \label{eqn:areaderiv}
+          \end{eqnarray}
+\end{description}
+and
+\begin{description}
+  \item[{\sc Weighted Volume Derivative Theorem}]
+    \begin{eqnarray}
+    \frac{\delta \mathcal{V}_W}{\delta r_{ab}}  &=&    \sum_{\tsx{i} \in K} \alpha_i \mathcal{V}_i \frac{\delta \gamma_i}{\delta r_{ab}} - \gamma_{ab} \alpha_a \frac{\delta\mathcal{V}_{a;b}}{\delta r_{ab}} - \gamma_{ab} \alpha_b \frac{\delta \mathcal{V}_{b;a}}{\delta r_{ab}}  
+    - \sum_{\tsx_{ij} \in K} \frac{\delta \gamma_{ij}}{\delta  r_{ab}}  (\alpha_i \mathcal{V}_{i;j} + \alpha_j \mathcal{V}_{j;i}) \nonumber \\
+  &&  + \sum_{i \mid \tsx_{abi} \in K} \gamma_{abi} \left(\alpha_a \frac{\delta \mathcal{V}_{a;bi}}{\delta r_{ab}} + \alpha_b \frac{\delta \mathcal{V}_{b;ai}}{\delta r_{ab}}+ \alpha_i \frac{\delta \mathcal{V}_{i;ab}}{\delta r_{ab}} \right)   \nonumber \\
+&&+  \sum_{i,j \mid \tsx_{abij} \in K} \left(\alpha_a \frac{\delta \Volume{(F_a)}}{\delta r_{ab}}    +  
+\alpha_b \frac{\delta \Volume{(F_b)}}{\delta r_{ab}} + \alpha_i \frac{\delta \Volume{(F_i)}}{\delta r_{ab}} + \alpha_j \frac{\delta \Volume{(F_j)}}{\delta r_{ab}}  \right) \nonumber \\
+  \label{eqn:volderiv}
+          \end{eqnarray}
+\end{description}
+Note that there are no terms involving the derivatives of $\gamma_{ijk}$: those derivatives are piecewise zero because $\gamma_{ijk}$ are piecewise constant. Those values change at non-generic states, where their derivatives are note defined \cite{BEKL04, EdKo03, AkEd19a, AkEd19b}.
+
+Similarly, we compute the derivatives of the mean curvature and Gaussian curvature with respect to the edge lengths algebraically. We get:
+
+\begin{description}
+  \item[{\sc Weighted Mean Curvature Derivative Theorem}]
+    \begin{eqnarray}
+    \frac{\delta \mathcal{M}_W}{\delta r_{ab}}  &=&\sum_{\tsx{i} \in K} \frac{\alpha_i}{r_i} \mathcal{A}_i \frac{\delta \gamma_i}{\delta r_{ab}}   - \gamma_{ab} \frac{\alpha_a}{r_a} \frac{\delta\mathcal{A}_{a;b}}{\delta r_{ab}} - \gamma_{ab} \frac{\alpha_b}{r_b} \frac{\delta \mathcal{A}_{b;a}}{\delta r_{ab}}  
+    - \sum_{ \tsx_{ij} \in K} \frac{\delta \gamma_{ij}}{\delta  r_{ab}}  \left(\frac{\alpha_i}{r_i} \mathcal{A}_{i;j} + \frac{\alpha_j}{r_j} \mathcal{A}_{j;i} \right) \nonumber \\
+  &&  + \sum_{i \mid \tsx_{abi} \in K} \gamma_{abi} \left(\frac{\alpha_a}{r_a} \frac{\delta \mathcal{A}_{a;bi}}{\delta r_{ab}} + \frac{\alpha_b}{r_b} \frac{\delta \mathcal{A}_{b;ai}}{\delta r_{ab}}+\frac{\alpha_i}{r_i}\frac{\delta \mathcal{A}_{i;ab}}{\delta r_{ab}} \right) \nonumber \\
+  &-&  \pi \sum_{\tsx_{ij} \in K} (\alpha_i+\alpha_j) \left(\frac{\delta \sigma_{ij}}{\delta r_{ab}} \varphi_{ij} r_{i:j} + \sigma_{ij} \frac{\delta \varphi_{ij}}{\delta r_{ab}} r_{i:j} + \sigma_{ij}  \varphi_{ij} \frac{\delta r_{i:j}} {\delta r_{ab}}\right)
+          \label{eqn:meanderiv}
+          \end{eqnarray}
+\end{description}
+and
+\begin{description}
+  \item[{\sc Weighted Gaussian Curvature Derivative Theorem}]
+    \begin{eqnarray}
+    \frac{\delta \mathcal{G}_W}{\delta r_{ab}}  &=&\sum_{\tsx{i} \in K} \frac{\alpha_i}{r_i^2} \mathcal{A}_i \frac{\delta \gamma_i}{\delta r_{ab}}   - \gamma_{ab} \frac{\alpha_a}{r_a^2} \frac{\delta\mathcal{A}_{a;b}}{\delta r_{ab}} - \gamma_{ab} \frac{\alpha_b}{r_b^2} \frac{\delta \mathcal{A}_{b;a}}{\delta r_{ab}}  
+    - \sum_{ \tsx_{ij} \in K} \frac{\delta \gamma_{ij}}{\delta  r_{ab}}  (\frac{\alpha_i}{r_i^2} \mathcal{A}_{i;j} + \frac{\alpha_j}{r_j^2} \mathcal{A}_{j;i}) \nonumber \\
+  &&  + \sum_{i \mid \tsx_{abi} \in K} \gamma_{abi} \left(\frac{\alpha_a}{r_a^2} \frac{\delta \mathcal{A}_{a;bi}}{\delta r_{ab}} + \frac{\alpha_b}{r_b^2} \frac{\delta \mathcal{A}_{b;ai}}{\delta r_{ab}}+\frac{\alpha_i}{r_i^2}\frac{\delta \mathcal{A}_{i;ab}}{\delta r_{ab}} \right) \nonumber \\
+  &-&  \pi \sum_{\tsx_{ij} \in K} (\alpha_i+\alpha_j) \left(\frac{\delta \sigma_{ij}}{\delta r_{ab}} \lambda_{ij}  +  \sigma_{ij}  \frac{\delta \lambda_{ij}} {\delta r_{ab}}\right) \nonumber \\
+  &+& 2 \sum_{\tsx_{ijk} \in K} \gamma_{ijk} \left (\alpha_i \frac{\delta \sigma_{i:jk}}{\delta r_{ab}} + \alpha_j \frac{\delta \sigma_{j:ki}}{\delta r_{ab}} + \alpha_k \frac{\delta \sigma_{k: ij}}{\delta r_{ab}} \right) \nonumber \\
+          \label{eqn:gaussderiv}
+          \end{eqnarray}
+\end{description}
+
+ 
+ \paragraph{Derivatives with respect to Cartesian coordinates}
+  
+ Once the derivatives with respect to internal coordinates are available, derivatives with respect to Cartesian coordinates are easily computed using the chain rule:
+ \begin{description}
+  \item[{\sc Cartesian Derivative Theorem}]
+    The gradients  $\AAA$, $\VVV$, $\MMM$, and $\GGG$ $\in \Rspace^{3n}$ of the area, volume, mean curvature, and Gaussian curvature derivatives are
+    \begin{eqnarray}
+      \left[ \begin{array}{c}
+               \AAA_{3i+1} \\ \AAA_{3i+2} \\ \AAA_{3i+3}
+             \end{array} \right]
+	&=&  \sum_{j \mid \tau_{ij} \in K} \frac{\delta \mathcal{A}_W}{\delta r_{ij}} u_{ij}  \nonumber \\
+	\left[ \begin{array}{c}
+               \VVV_{3i+1} \\ \VVV_{3i+2} \\ \VVV_{3i+3}
+             \end{array} \right]
+	&=&  \sum_{j \mid \tau_{ij} \in K} \frac{\delta \mathcal{V}_W}{\delta r_{ij}} u_{ij}  \nonumber \\
+	\left[ \begin{array}{c}
+               \MMM_{3i+1} \\ \MMM_{3i+2} \\ \MMM_{3i+3}
+             \end{array} \right]
+	&=&  \sum_{j \mid \tau_{ij} \in K} \frac{\delta \mathcal{M}_W}{\delta r_{ij}} u_{ij}  \nonumber \\
+         \left[ \begin{array}{c}
+               \GGG_{3i+1} \\ \GGG_{3i+2} \\ \GGG_{3i+3}
+             \end{array} \right]
+	&=&  \sum_{j \mid \tau_{ij} \in K} \frac{\delta \mathcal{G}_W}{\delta r_{ij}} u_{ij} 
+	\label{eqn:deriv_cart}
+      \end{eqnarray}
+  \end{description}
+  where $u_{ij} = (z_i-z_j)/r_{ij}$ is the unit vector along the edge $z_i z_j$.
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Surface areas, volumes of the intersections of two and three balls, and their derivatives}
+\label{sec:threesphere}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Several formulas have been presented for the volume and surface areas of the intersection of two, three and up to four spheres with unequal radii (see for example \cite{GS87, GS88, EdFu94}). Here we describe new geometric derivations of these formulas,  that satisfy a specific constraint, namely we need expressions for the intersections that only depend of the radii of the spheres and the distance between their centers. These derivations were originally described in \cite{MK11}; they are provided here for sake of completeness, as well as a support to provide the derivatives of those geometric measures with respect to the distance between the sphere centers.
+
+\paragraph{Notation}  We consider up to three balls $B_i$, $B_j$, and $B_k$ whose boundaries are the spheres $S_i$, $S_j$, and $S_k$, respectively.  Let $z_i$ and $r_i$ be the center and radius of ball $B_i$ and let $r_{ij}$ be the distance between $z_i$ and $z_j$.  The intersection between the two balls $B_i$ and $B_j$ is the union of two caps $\mathcal{C}_{i;j}$ and $\mathcal{C}_{j:i}$ , illustrated in red and blue respectively in figure \ref{fig:TwoSphere1}. 
+
+\begin{figure}[hbt]
+\centerfig{Twosphere1}{height=1.5in}
+\caption{ Intersection of two disks.}
+\label{fig:TwoSphere1}
+\end{figure}
+
+These two caps are connected at the level of the plane that separates the Voronoi cells of $S_i$ and $S_j$; this plane cuts the two spheres in a circle  with center $y_{i;j}$ and radius $r_{i;j}$.  We also define the height of spherical cap $\mathcal{C}_{i;j}$ as $h_{i;j}$. As noted in \cite{BEKL04}, the signed distance between $z_i$ and the plane is:
+\begin{eqnarray}
+\zeta_i = \frac{r_{ij}}{2}  + \frac{r_i^2 - r_j^2}{2r_{ij}}.
+\label{eqn:zeta}
+\end{eqnarray}
+Hence,
+\begin{eqnarray}
+h_{i;j} &=& r_i - \zeta_i \label{eqn:capheight} \\
+r_{i;j}  &=& \sqrt{r_i^2 - \zeta_i^2} \label{eqn:disk_rad}
+\end{eqnarray}
+Setting 
+\begin{eqnarray}
+\lambda_i = -\frac{\delta \zeta_i}{\delta r_{ij}} = -\frac{1}{2} + \frac{r_i^2 - r_j^2}{2r_ij},
+\end{eqnarray}
+we get
+\begin{eqnarray}
+\frac{\delta h_{i:j}}{\delta r_{ij}} &=& \lambda_i \\
+\frac{\delta r_{i:j}}{\delta r_{ij}} &=& \frac{\zeta_i \lambda_i}{r_{i:j}}
+\end{eqnarray}
+
+As above, $\mathcal{A}_i$ is the surface area of the sphere $S_i$; $\mathcal{A}_{i;j}$, $\mathcal{A}_{i;jk}$ and $\mathcal{A}_{i;jkl}$ are the contributions of $S_i$ to the surface areas of the intersections of $S_i$ and $S_j$, of $S_i$, $S_j$ and $S_k$, and of $S_i$, $S_j$, $S_k$ and $S_l$, respectively:
+\begin{eqnarray*}
+\mathcal{A}_{i;j} = \Area{(C_{i;j})} \quad \quad \quad
+\mathcal{A}_{i;jk} = \Area{(C_{i;j} \cap C_{i;k})} \quad \quad \quad
+\end{eqnarray*}
+Similar expressions are used for volumes.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Intersection of two balls} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\paragraph{Proposition 1.} \emph{The intersection between two balls is illustrated in figure \ref{fig:TwoSphere1}. We have:}
+\begin{eqnarray}
+\mathcal{A}_{i;j} &=& 2 \pi r_i h_{i;j} \label{eqn:twosurf}\\
+\mathcal{V}_{i;j} &=& \frac{1}{3} \pi h_{i;j}^2 (3r_i - h_{i;j}) \label{eqn:twovol}
+\end{eqnarray}
+\emph{with $h_{i;j}$ defined in equation \ref{eqn:capheight}.}
+
+ \paragraph{\emph{Proof.} }
+ Equation \ref{eqn:twosurf} is simply Archimedes's area formula. The volume formula \ref{eqn:twovol} can easily be computed using calculus.
+ 
+ \paragraph{Proposition 2.} \emph{The derivatives of the surface area and volume of a spherical cap are then given by:}
+ \begin{eqnarray}
+\frac{\delta \mathcal{A}_{i;j}}{\delta r_{ij}}  &=& 2 \pi r_i \lambda_i \label{eqn:twosurfder}\\
+\frac{\delta\mathcal{V}_{i;j} }{\delta r_{ij}} &=& \frac{2}{3} \pi h_{i;j} \lambda_i (3r_i - h_{i;j}) - \frac{1}{3} \pi h_{i;j}^2 \lambda_i \nonumber \\
+&=&  \pi h_{i:j} \lambda_i (2r_i - h_{i:j}) \label{eqn:twovol}
+\end{eqnarray}
+
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Intersection of three balls}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[hbt]
+	\centerfig{ThreeSphere1}{width=5 in}
+\caption{\textbf{A}. Intersection of three balls. \textbf{B}. The core tetrahedron $T$ that defines the intersection of the three balls. $z_i$, $z_j$ and
+	 $z_k$ are the centers of the spheres. $P_{ijk}$ is one of the two points common to the three spheres; as such, it is located at distances $r_i$, $r_j$ and $r_k$ from $z_i$, $z_j$ and $z_k$, respectively. }
+	\label{fig:2cap3d}
+\end{figure}
+
+The contribution of $B_i$ to the surface area and volume of the intersection of the three balls $B_i$, $B_j$ and $B_k$ is defined by the intersection of the two caps $\mathcal{C}_{i;j}$ and $\mathcal{C}_{i:k}$ , illustrated in red and blue respectively in panel A of figure \ref{fig:2cap3d}.  The three spheres $S_i$, $S_j$ and $S_k$ intersect in two points $P_{ijk}$ and $P_{ikj}$.  We consider the tetrahedron $T_3$ formed by the centers of the three balls and $P_{ijk}$ (see panel B of figure \ref{fig:2cap3d}).  The faces of $T_3$  are labeled $z_iz_jz_k$, $z_iz_jP_{ijk}$, $z_iz_kP_{ijk}$ and $z_jz_kP_{ijk}$ with areas $s_P$, $s_k$, $s_j$ and $s_i$, respectively. The areas are computed using Heron's formula (see appendix A). The dihedral angles corresponding to the edges $z_iz_j$ and $z_iz_k$ are denoted as $\theta_{ij;k}$ and $\theta_{ik;j}$, respectively, while $\psi_i$ is the dihedral angle corresponding to the edge $z_iP_{ijk}$.
+\paragraph{Proposition 3.}
+\emph{The contributions of $S_i$ and $B_i$ to the surface area and volume of the triple intersection are given by:}
+\begin{eqnarray}
+ \mathcal{A}_{i;jk} &=&2 r_i h_{i;j} \theta_{ij;k}  + 2 r_i h_{i;k} \theta_{ik;j} - 2 r_i^2(\theta_{ij;k} + \theta_{ik;j} + \psi_{i} - \pi) \label{eqn:threesurf} \\
+ \mathcal{V}_{i;jk} &=& \frac{1}{3} r_i \mathcal{A}_{i;jk} - \frac{1}{3} (r_i - h_{i;j})  ( 2r_i h_{i;j} -h_{i;j}^2) \left (\theta_{ij;k} - \sin \left( \theta_{ij;k} \right) \cos \left( \theta_{ij;k} \right)\right)  \nonumber \\
+&&- \frac{1}{3} (r_i - h_{i;k})( 2r_i h_{i;k} -h_{i;k}^2) \left (\theta_{ik;j} - \sin \left( \theta_{ik;j} \right) \cos \left( \theta_{ik;j} \right)\right) \label{eqn:threevol}
+\end{eqnarray}
+\emph{where the dihedral angles are computed from the edge lengths of the tetrahedron $T_3$ (see appendix B).
+Formulas for the contributions of $B_j$ and $B_k$ to the intersection are easily deduced by index permutation on these equations.}
+
+\paragraph{\emph{Proof.}}  We focus on the geometric proofs of equations \ref{eqn:threesurf} and \ref{eqn:threevol}.
+\paragraph{Surface area}
+
+\begin{figure}[!hbt]
+	\centerfig{ThreeSphere2}{width=2.5 in}
+\caption{Intersection of three spheres $B_i$, $B_j$ and $B_k$ viewed on the flattened surface of  $B_i$. 
+	Key to our approach is the spherical quadrangle formed by the two points $P_{ijk}$ and $P_{ikj}$ that are common to the three spheres and by the ``centers" of the caps, $z_{i;j}$ and $z_{i;k}$.}
+	\label{fig:2cap}
+\end{figure}
+
+Let  $z_{i;j}$ and $z_{i;k}$ be the points of intersection of the sphere $S_i$ bounding the ball $B_i$ with the lines $z_iz_j$ and $z_iz_k$, respectively; these two points can be seen as "centers" of the two caps.
+$P_{ijk}$ and $P_{ikj}$ are the two points that are common to all three spheres. These four points form a spherical quadrangle, with spherical angles $\beta_{ij;k}$, $\beta_{ik;j}$,
+$\alpha_{ijk}$ and $\alpha_{ikj}$ (see figure \ref{fig:2cap}).
+Note that this quarangle is symmetric with respect to the plane formed by the centers of the three balls which is also the plane passing by the three points $z_i$, $z_{i;j}$ and $z_{i:k}$.  Consequently,
+$\alpha_{ijk}=\alpha_{ikj}$.
+
+The spherical angle $\beta_{ij;k}$ is the dihedral angle between the plane $\Delta z_i z_{i;j} P_{ijk}$
+and the plane $\Delta z_i z_{i;j} P_{ikj}$. Because of the symmetry with respect to the plane containing the three centers, and because $z_{i;j}$ belongs to the line $z_i z_j$, we find $\beta_{ij;k} = 2 \theta_{ij;k}$; similarly, $\beta_{ik;j} = 2 \theta_{ik;j}$ and $\alpha_{ijk} = \psi_{i}$.
+
+We compute the surface area $Q$ of this spherical quadrangle in two different ways.
+First, we use the formula for the area of a polygon on a sphere ($\displaystyle A=R^2 \left(\sum_{i=1}^n \theta_i -(n-2)\pi\right)$, where $R$ is the radius of the sphere, $n$ the number of vertices in the polygon, and $\theta_i$ the internal angle at vertex $i$):
+\begin{eqnarray}
+Q = r_i^2(2 \theta_{ij;k} + 2\theta_{ik;j} + 2\psi_{i} - 2\pi)
+\label{eqn:quad1}
+\end{eqnarray}
+Second, we observe that the area of the quadrangle can be decomposed as:
+\begin{itemize}
+\item [+] the area $A_1$ of the sector of the cap $\mathcal{C}_{i;j}$ that is delimited by the two arcs $z_{i;j}P_{ijk}$ and $z_{i;j}P_{ikj}$
+\item [+] the area $A_2$ of the sector of the cap $\mathcal{C}_{i;k}$ that is delimited by the two arcs $z_{i;k}P_{ijk}$ and $z_{i;k}P_{ikj}$, 
+\item [-]  the area of the intersection $\mathcal{A}_{i;jk}$ as it appears twice.
+\end{itemize}
+Therefore
+\begin{eqnarray}
+Q = A_1 + A_2 - \mathcal{A}_{i;jk}
+\label{eqn:quad2}
+\end{eqnarray}
+The surface areas $A_1$ and $A_2$ are the fraction of the surface areas of the caps $\mathcal{C}_{ij}$ and $\mathcal{C}_{ik}$ covered by the angles $2\theta_{ij}$ and $2\theta_{ik}$
+\begin{eqnarray}
+A_1 =  2 r_i h_{i;j} \theta_{ij;k} \nonumber  \\
+A_2 = 2 r_i h_{i;k} \theta_{ik;j}
+\label{eqn:a1a2}
+\end{eqnarray}
+where $h_{i:j}$ and $h_{i:k}$ are the heights of the two caps.
+
+Combining equations \ref{eqn:quad1}, \ref{eqn:quad2} and \ref{eqn:a1a2}, we validate equation \ref{eqn:threesurf}.
+
+\begin{figure}[hbt]
+	\centerfig{ThreeBall1}{width=4.5in}
+\caption{ \textbf{Computing the volume of the intersection of 3 balls}. \textbf {A}. The plane passing through
+	the centers $z_i$, $z_j$ and $z_k$ of the three balls.
+	$v_{i;j}$ and $v_{i;k}$ are the distances between the center $z_i$ and the Voronoi planes
+	separating $i$ and $j$, and $i$ and $k$, respectively, while $y_{i;j}$ and $y_{i;k}$ are the points of intersection between the edges $z_i z_j$ and $z_i z_k$ with these two planes.  The contribution $B_{i;jk}$ of $B_i$ to the intersection of the three balls is shown in green.  The sector joining $z_i$ to $B_{i;jk}$ is the key to computing its volume.
+	This sector can be divided into three parts: $B_{i;jk}$ itself, and two fractions of cones $F_{ij;k}$ and $F_{ik;j}$, filled in blue and red, respectively.
+	\textbf{B}. Projected view on the plane identified with arrows on panel \textbf{A}, i.e. the Voronoi plane
+	between balls $B_i$ and $B_j$.  The base of the fraction of cone $F_{ij;k}$ is shown filled in blue. }
+	\label{fig:threeball}
+\end{figure}
+
+\paragraph{Volume}
+
+To compute the contribution $\mathcal{V}_{i;jk}$ of ball $B_i$ to the volume of the intersection of the three balls, we consider the sector of $B_i$ that joins its center $z_i$ to the sphere sector whose surface is $\mathcal{A}_{i;jk}$.  The volume $V_s$ of this sector can  be computed in two different ways:
+
+\begin{itemize}
+
+\item First, the volume $V_s$ of a sector is given as $r_i A/3$, where $r_i$ is the radius of the ball and $A$ is the area of the sector on the surface of the ball:
+\begin{eqnarray}
+V_s = \frac{1}{3} r_i \mathcal{A}_{i;jk}
+\label{eqn:volvs}
+\end{eqnarray}
+\item Second, the same sector can be divided into three parts (see panel A in figure \ref{fig:threeball}): two fractions of cones (filled in red and blue), and the region $B_{i;jk}$, whose volume is $\mathcal{V}_{i;jk}$ (shown in green):
+\begin{eqnarray}
+V_s = \Volume{(F_{ij;k})} + \Volume{(F_{ik;j})} + \mathcal{V}_{i;jk}
+\end{eqnarray}
+The volume of $F_{ij;k}$ is:
+\begin{eqnarray}
+\Volume{(F_{ij;k})} = \frac{1}{3} (r_i -h_{i;j}) AS_{ij;k}
+\end{eqnarray}
+where $AS_{ij;k}$ is the area of the base of $F_{ij;k}$, i.e. the area of the disk of intersection between $B_i$ and $B_j$ covered by the cap
+$C_{i;k}$ (see panel B in figure \ref{fig:threeball}). $AS_{ij;k}$ is computed as the difference between the area of the disk covered by $2\theta_{ik}$ and the triangle $\Delta y_{i;j} P_{ijk} P_{ikj}$.
+\begin{eqnarray}
+AS_{ij;k} = r_{i;j}^2 \left (\theta_{ij;k} - \sin {\theta_{ij;k} }  \cos {\theta_{ij;k} } \right)
+\label{eqn:as}
+\end{eqnarray}
+where $r_{i;j}$ is the radius of the disk (see equation \ref{eqn:disk_rad}). Note that this formula is valid even if the disk sector covers the disk center.
+Similar expressions are derived for the volume of $F_{ik;j}$.
+\end{itemize}
+
+Combining equations \ref{eqn:volvs} to \ref{eqn:as}, we validate equation \ref{eqn:threevol}.
+
+ Formulas for the derivatives with respect to edge lengths of the terms $\mathcal{A}_{i;jk}$ and $\mathcal{V}_{i;jk}$ are straightforward from their analytical expressions, pending that the corresponding derivatives of the dihedral angles they include are known. Computations of the derivatives of the dihedral angles of a tetrahedron as a function of the edge lengths of that tetrahedron are provided in appendix B.
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Derivatives of the coefficients in the weighted intrinsic volume derivatives}
+\label{sec:others}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ \subsection{Derivatives of $\gamma_{i}$, $\gamma_{ij}$, and $\gamma_{ijk}$}
+ 
+ The angular coefficient $\gamma_i$ of a vertex $z_i$ is computed over all tetrahedra of $K$ that contain $i$.
+If $z_i$ is such that it belongs to at least one tetrahedron of $K$ that also contains $z_a$ and $z_b$, then:
+\begin{eqnarray}
+ \frac{\delta \gamma_{i}}{\delta r_{ab}} = - \frac{1}{4\pi}   \sum_{j \mid \tsx_{ijab} \in K} 
+ \left(  \frac{\delta \phi_{ij:ab}}{\delta r_{ab}}  + \frac{\delta \phi_{ia:jb}}{\delta r_{ab}} + \frac{\delta \phi_{ib:ja}}{\delta r_{ab}}  \right)
+ \end{eqnarray}
+ In all other cases, $\frac{\delta \gamma_{i}}{\delta r_{ab}} = 0$. Similarly,
+ \begin{eqnarray}
+\frac{\delta \gamma_{ij}} {\delta r_{ab}} = - \frac{1}{2\pi} \frac{\delta \phi_{ij}}{\delta r_{ab}}
+\end{eqnarray}
+ if $\tsx_{ijab} \in K$, and $0$ otherwise.
+ The derivatives of the dihedral angles of a tetrahedron with respect to its edge lengths are given in appendix B.
+ 
+The derivatives of $\gamma_{ijk}$ are piecewise zero because $\gamma_{ijk}$ are piecewise constant. Those values change at non-generic states, where their derivatives are note defined \cite{BEKL04, EdKo03, AkEd19a, AkEd19b}.
+ 
+  \subsection{Derivatives of $r_{i:j}$, $\varphi_{ij}$, and $\lambda_{ij}$}
+ 
+ \begin{figure}[hbt]
+\centerfig{Twosphere2}{height=2in}
+\caption{ Intersection of two spheres $S_i$ and $S_j$. $r_{i:j}$ is the radius of the circle of intersection $S_{ij}=S_i\bigcap S_j$. $\varphi_{ij}$ is the angle between unit normals of $S_i$ and $S_j$ at any point P on $S_{ij}$. After projecting such normals on the line joining the centers $z_i$ and $z_j$ of $S_i$ and $S_j$, $\lambda_{ij}$ is the distance between the corresponding endpoints.}
+\label{fig:twosphere2}
+\end{figure}
+
+Those three coefficients are directly derived from the intersections of two spheres $S_i$ and $S_j$ (see figure \ref{fig:twosphere2}). Recall that $r_{i:j}$ is the radius of the circle $S_{ij}$ of intersection of $S_i$ and $S_j$; its value and derivative with respect to the distance between the centers of $S_i$ and $S_j$ are provided above.
+
+The angle $\varphi_{ij}$ is the angle between the unit normals of $S_i$ and $S_j$ at any point on the circle $S_{ij}$. Using the law of cosine in the triangle $\Delta z_i z_j P$, we get:
+\begin{eqnarray}
+\varphi_{ij} = \arccos \left( \frac{ r_i^2 + r_j^2 - r_{ij}^2 }{2r_ir_j} \right)
+\label{eqn:varphi}
+\end{eqnarray}
+Simple differentiation of equation \ref{eqn:varphi} gives the derivatives of $\varphi_{ij}$ with respect to the distance $r_{ij}$ between the centers $z_i$ and $z_j$ of $S_i$ and $S_j$:
+\begin{eqnarray}
+\frac{ \delta \varphi_{ij}}{\delta r_{ij}} = \frac{r_{ij}} {\sqrt{4r_i^2r_j^2 - (r_i^2+r_j^2-r_{ij}^2)^2}}
+\label{eqn:dvarphi}
+\end{eqnarray}
+
+We recall that $\lambda_{ij}$ is the distance between the projections of the unit normals of $S_i$ and $S_j$ at a point P on the circle of intersection $S_{ij}$. It can be directly computed from the knowledge of the signed distances $\zeta_i$ and $\zeta_j$ between the centers $z_i$ and $z_j$ from the Voronoi plane containing $S_{ij}$ (see equation \ref{eqn:zeta}):
+\begin{eqnarray}
+\lambda_{ij} = \frac{\zeta_i}{r_i} + \frac{\zeta_j}{r_j} = \frac{r_{ij}}{2}\left(\frac{1}{r_i}+\frac{1}{r_j}\right) + \frac{r_i^2-r_j^2}{2r_{ij}}\left(\frac{1}{r_i}-\frac{1}{r_j}\right)
+\end{eqnarray}
+The derivative of $\lambda_{ij}$ with respect to $r_{ij}$, the distance between $z_i$ and $z_j$ is therefore
+\begin{eqnarray}
+\frac{\delta \lambda_{ij}}{\delta r_{ij}} = \frac{1}{2}\left(\frac{1}{r_i}+\frac{1}{r_j}\right) - \frac{r_i^2-r_j^2}{2r_{ij}^2}\left(\frac{1}{r_i}-\frac{1}{r_j}\right)
+\end{eqnarray}
+
+   \subsection{Derivatives of $\sigma_{ij}$}
+Let $S_i$ and $S_j$ be two intersecting spheres and let $S_{ij}$ be the corresponding circle of intersection. $\sigma_{ij}$ is the fraction of the length of $S_{ij}$ that is accessible,
+i.e. that is not covered by any other spheres. In references \cite{BEKL04, AkEd19a}, Edelsbrunner and co-workers developed formula for computing $\sigma_{ij}$ and its derivatives based on extrinsic geometry, i.e. based on the knowledge of the Cartesian coordinates of the centers of the spheres that are related to $S_i$ and $S_j$. Here we revisit this problems and derive new formula based on intrinsic geometry, namely only on distances between sphere centers.
+
+We first establish the following property.
+\paragraph{Proposition 4.}
+\emph{The fraction of $S_{ij}$ that is not covered is given by:}
+\begin{eqnarray}
+\sigma_{ij} = 1 - 2\sum_{k | \tau_{ijk} \in K} \gamma_{ijk} \frac{\theta_{ij:k}}{2\pi} - \sum_{kl | \tau_{ijkl} \in K} \frac{\phi_{ij:kl}}{2\pi}
+\label{eqn:sigmaij}
+\end{eqnarray}
+where the angles $\theta_{ij:k}$ and $\phi_{ij:kl}$ are the dihedral angles along the edge $z_i z_j$ in the tetrahedra $T_3={z_iz_jz_k P_{ijk}}$ and $T_4 = {z_i z_j z_k z_l}$, respectively (see section above for details), and $\gamma_{ijk}$ is defined in equation \ref{eqn:gammaijk}.
+
+\begin{figure}[hbt]
+\centerfig{Sigma}{height=2.5in}
+\caption{ \textbf{The circle of intersection of two spheres.} We consider two spheres $S_i$ and $S_j$; the Voronoi plane between their centers  cuts the two spheres in a circle  with center $y_{i;j}$ and radius $r_{i;j}$. In \textbf{A}, this circle is partially covered by a third sphere $S_k$, that intersects the circle at two points $P_{ijk}$ and $P_{ijkl}$, while in \textbf{B}, it is partially covered by two sphere $S_k$ and $S_l$. We assume that the corresponding caps between $P_{ijk}$ and $P_{ikj}$ for sphere $S_k$, and between $P_{ijl}$ and $P_{ilj}$ for sphere $S_l$, are not nested. This is always the case in the dual complex}
+\label{fig:sigma}
+\end{figure}
+
+ \paragraph{\emph{Proof.}}  The proof follows from the inclusion-exclusion principle. We illustrate it here for two, three, and four spheres.
+
+In the simplest case of two intersecting spheres, the whole length of the intersecting circle is accessible, and $\sigma_{ij} = 1$.
+
+When three spheres $S_i$, $S_j$, and $S_k$ intersect, forming a face in the dual complex K, the circle of intersection $S_{ij}$ between $S_i$ and $S_j$ is partially covered by $S_k$, see Figure \ref{fig:sigma}A. The length of $S_{ij}$ that is covered is the arc $P_{ijk} P_{ikj}$ whose length is $r_{i:j}\times 2\theta_{ij:k}$. In this case, we have:
+\begin{eqnarray}
+\sigma_{ij} = \frac{ 2\pi r_{i:j} - 2r_{i:j} \theta_{ij:k}}{2\pi r_{i:j}} = 1 - 2\frac{\theta_{ij:k}}{2\pi}
+\end{eqnarray}
+
+When four spheres $S_i$, $S_j$, $S_k$, and $S_l$ intersect, forming a tetrahedron in the dual complex K, the circle of intersection $S_{ij}$ between $S_i$ and $S_j$ is partially covered by both $S_k$ and $S_l$, see Figure \ref{fig:sigma}B. The length of $S_{ij}$ that is covered is the sum of the arc $P_{ijk} P_{ikj}$ whose length is $r_{i:j}\times 2\theta_{ij:k}$, of the arc $P_{ijl} P_{ilj}$ whose length is $r_{i:j}\times 2\theta_{ij:l}$, minus the sub arc that is common to those two arcs, whose length is $r_{i:j}\times x$. Notice that
+\begin{eqnarray*}
+\phi_{ij:kl} = \theta_{ij:k} + \theta_{ij:l} - x,
+\end{eqnarray*}
+i.e. 
+\begin{eqnarray*}
+x =  \theta_{ij:k} + \theta_{ij:l} - \phi_{ij:kl}.
+\end{eqnarray*}
+Therefore:
+\begin{eqnarray}
+\sigma_{ij} &=& \frac{ 2\pi r_{i:j} - 2r_{i:j} \theta_{ij:k} - 2r_{i:j} \theta_{ij:l} +r_{i:j} x}{2\pi r_{i:j}} \nonumber \\
+&=& \frac{ 2\pi r_{i:j} - r_{i:j} \theta_{ij:k} - r_{i:j} \theta_{ij:l} - r_{i:j} \phi_{ij:kl}}{2\pi r_{i:j}} \nonumber \\
+&=& 1 - \frac{\theta_{ij:k}}{2\pi} - \frac{\theta_{ij:l}}{2\pi} - \frac{\phi_{ij:kl}}{2\pi}
+\end{eqnarray}
+Extensions of those three cases to include all simplices of the dual complex that contain the edge $z_i z_j$ leads to equation \ref{eqn:sigmaij}.
+
+Formulas for the derivatives of $\sigma_{ij}$ with respect to edge lengths are then straightforward:
+\begin{eqnarray}
+\frac{\delta \sigma_{ij}}{\delta r_{ab}} = 1 - \frac{1}{\pi}\sum_{k | \tau_{ijk} \in K} \gamma_{ijk}  \frac{\delta \theta_{ij:k}}{\delta r_{ab}} - \frac{1}{2\pi}\sum_{kl | \tau_{ijkl} \in K} \frac{\delta \phi_{ij:kl}}{\delta r_{ab}}
+\label{eqn:dsigmaij}
+\end{eqnarray}
+where the derivatives of the dihedral angles of a tetrahedron as a function of edge lengths are provided in appendix B.
+
+   \subsection{Derivatives of $\sigma_{i:jk}$}
+   
+   The weighted Gaussian curvature includes three terms that account for the spherical patches, the circular arcs between spheres, and corners. While the first two terms are akin to terms found in the weighted surface area and the weighted volume functions (term 1), and in the mean curvature function (term 2), the corner term is specific to Gaussian curvatures. It comes into consideration for all faces in the dual complex. 
+  Let us consider one such face,  corresponding to the three vertices $z_i$, $z_j$, and $z_k$ that are centers of the three spheres $S_i$, $S_j$, and $S_k$, respectively.
+  Those three spheres intersect at two corners, $P_{ijk}$ and $P_{ikj}$ (see figure \ref{fig:2cap3d}), that both contribute to the Gaussian curvature. As the spheres have different radii, we need a scheme to compute the contribution of each corner to the Gaussian curvature, to divide this contribution among the three spheres, and to compute the derivatives of the corresponding sphere-specific contribution. In agreement with the general approach used in this paper, all those contributions and derivatives will be expressed as functions of the inter-vertex distances, namely $r_{ij}$, $r_{jk}$, and $r_{ik}$. These formulas have been derived in \cite{AkEd19b}. We provide slightly simpler proofs here.  
+  
+  \begin{figure}[hbt]
+\centerfig{Spherical}{height=2.5in}
+\caption{ \textbf{Contribution of a corner of the space-filling diagram to the Gaussian curvature.} We consider three intersecting spheres $S_i$, $S_j$, and $S_k$ and one of the two points common to the three spheres, $P_{ijk}$. \textbf{A} The outward unit normals $n_i$, $n_j$, and $n_k$ of the three spheres at this point form a spherical triangle whose area is the contribution of $P_{ijk}$ to the Gaussian curvature. To divide this contribution among the three spheres, we consider the cap with center $c$ whole boundary is the unique circle that passes through the three vertices $n_i$, $n_j$, and $n_k$. Based on $c$, the spherical triangle is divided into three spherical triangles, $\Delta n_j c n_k$, $\Delta n_i c n_k$, and $\Delta n_i c n_j$, with area $A_i$, $A_j$, $A_k$, respectively. It can also be divided into three quadrangles by considering the midpoints $m$ of the three sides. The area $\sigma_{i:jk}$ is the contribution of the Gaussian curvature at $P_{ijk}$ to the sphere $S_i$. \textbf{B} Note that the center $c$ of the circumcircle may be outside of the spherical triangle $n_i n_j n_k$. In the example shown, the oriented area $A_i$ $n_j c n_k$ is negative.}
+\label{fig:Spherical}
+\end{figure}
+
+  Let us consider the corner $P_{ijk}$ and let $n_i$, $n_j$, and $n_k$ be the unit outward normals of the spheres at $P_{ijk}$. The total contribution of this corner to the Gaussian curvature is equal to the area $\sigma_{ijk}$ of the spherical triangle $\Delta n_i n_j n_k$ with vertices $n_i$, $n_j$, and $n_k$ on the unit sphere (see Figure \ref{fig:Spherical}).   The geodesic lengths of the side of $ST$ are $\varphi_{ij}$, $\varphi_{jk}$, and $\varphi_{ik}$, as defined in figure \ref{fig:twosphere2}.  We first establish the following property,
+\paragraph{Proposition 5.} \emph{Let $T$ be a geodesic spherical triangle with side lengths $\alpha$, $\beta$, and $\gamma$, and let $a=\cos^2(\alpha/2)$, $b=\cos^2(\beta/2)$, and $c=\cos^2(\varphi_{ik}/2)$. The surface of this triangle, defined as $S(a,b,c)$, is given by}
+  \begin{eqnarray}
+  S(a,b,c) = 2 \arcsin{\sqrt{ \frac{4abc - (a+b+c-1)^2}{4abc} } }.
+  \end{eqnarray}
+  \paragraph{\emph{Proof.}} We start with a formula for the cosine of half of the area $S(a,b,c)$ that was originally established by Euler \cite{Euler1797, Papa14}:
+    \begin{eqnarray}
+  \cos \left(\frac{S(a,b,c)}{2} \right) =\frac{1+\cos \alpha + \cos \beta + \cos \gamma}{4 \cos \frac{\alpha}{2} \cos \frac{\beta}{2} \cos \frac{\gamma}{2}}
+  \end{eqnarray}
+ Using $cos(x)= 2cos^2(\frac{x}{2}) - 1$ and the definitions of $a$, $b$, and $c$, we get,
+\begin{eqnarray}
+  \cos \left(\frac{S(a,b,c)}{2} \right) =\frac{a+b+c-1}{2 \sqrt{abc}}.
+  \end{eqnarray}
+  Therefore,
+ \begin{eqnarray}
+  \sin \left(\frac{S(a,b,c)}{2} \right) &=& \sqrt{ 1 - \cos^2(\frac{S(a,b,c)}{2})} \nonumber \\
+  &=&  \sqrt{ 1 - \frac{(a+b+c-1)^2}{4abc}} \nonumber \\
+   &=&  \sqrt{ \frac{4abc-(a+b+c-1)^2}{4abc}} 
+   \label{eqn:sin}
+  \end{eqnarray}
+ which directly leads to the formula in proposition 5.
+ 
+ As a consequence of property 5, $\sigma_{ijk}=S(a,b,c)$ where $a=\cos^2(\varphi_{ij}/2)$, $b=\cos^2(\varphi_{jk}/2)$, and $c=\cos^2(\varphi_{ik}/2)$. $\sigma_{ijk}$ represents the total contribution of the corner $P_{ijk}$ to the Gaussian curvature. As the three spheres $S_i$, $S_j$, and $S_k$ have different weights, we break down this contribution to individual contributions of the spheres:
+ \begin{eqnarray} 
+  \sigma_{ijk} &=& \omega_i \sigma_{ijk}  + \omega_j \sigma_{ijk} + \omega_k \sigma_{ijk} \nonumber \\
+  &=& \sigma_{i:jk}  +  \sigma_{j:ki} +  \sigma_{k: ij} 
+ \end{eqnarray}
+where the partitioning is based on the position of the spherical circumcenter $c$ of $n_i$, $n_j$, and $n_k$ (see \ref{fig:Spherical}A for details). Note that the coefficients $\omega_i$, $\omega_j$, and $\omega_k$ can be seen as spherical barycentric coordinates of $c$ with respect to the spherical triangle $\Delta n_i n_j n_k$. To compute those coordinates, or alternatively the corresponding fractions of the total surface area $\sigma_{ijk}$, we divide the triangle $\Delta n_i n_j n_k$ in two different ways. First, the triangle is subdivided into three triangles, $\Delta c n_j n_k$, $\Delta n_i c n_k$, and $\Delta n_i c n_k$, with surface areas $A_i$, $A_j$, and $A_k$, respectively. If $R(a,b,c)$ is the spherical radius of the circumcircle of $n_i$, $n_j$, and $n_k$, and if we define $r(a,b,c)=\cos^2(R(a,b,c)/2)$, then
+\begin{eqnarray}
+A_i &=& S(r,r,c) \nonumber \\
+A_j &=& S(r,b,r) \nonumber \\
+A_k &=& S(a,r,r) 
+\end{eqnarray}
+Second, we define $m_i$, $m_j$, and $m_k$ as the midpoints of $z_j z_k$, $z_i z_k$, and $z_i z_j$, respectively. The triangle $\Delta n_i n_j n_k$ is then subdivided into three quadrangles, $n_i m_k c m_j$, $n_j m_k c m_i$, and $n_k m_j c m_i$, with surface areas $\sigma_{i:jk}$, $\sigma_{j:ik}$, and $\sigma_{k:ij}$, respectively. To establish the correspondence between the areas $A$ and the areas $\sigma$, we need to take into account the possibility that the circumcenter $c$ falls outside of the triangle $\Delta n_i n_j n_k$. In the case illustrated in Figure \ref{fig:Spherical}B, the corresponding spherical barycentric coordinate $\omega_i$ would be negative. This occurs when $n_i$ and $c$ lies on opposite side of the side $n_j n_k$. The boundary case, i.e. $c$ lies on $n_j n_k$ occurs when $\sin^2 (\varphi_{ij}/2) + \sin^2 (\varphi_{ik}/2) = \sin^2 (\varphi_{jk}/2)$, or equivalently when $a + c = 1 + b$ (see \cite{AkEd19b} for details). When $a+c \le 1 +b$, $n_i$ and $c$ lie on the same side of $n_j n_k$. We define
+\begin{eqnarray}
+sign(i,jk) = \begin{cases}
++1 &\text{if $a+c \le b$}\\
+-1 &\text{otherwise}
+\end{cases}
+\end{eqnarray}
+Using this sign function, we get:
+\begin{eqnarray}
+\sigma_{i:jk} = \frac{1}{2} \left[ sign(k,ij) A_k + sign(j,ik) A_j \right] \nonumber \\
+\sigma_{j:ik} = \frac{1}{2} \left[ sign(i,jk) A_i + sign(k,ij) A_k \right] \nonumber \\
+\sigma_{k:ij} = \frac{1}{2} \left[ sign(i,jk) A_i + sign(j,ik) A_j \right]
+\label{eqn:sig}
+\end{eqnarray}
+To be complete, we still need the radius $R(a,b,c)$ of the circumcircle, or equivalently, the cosine squared of its half, $r(a,b,c)$. We have,
+\begin{eqnarray}
+\tan(R(a,b,c)) = \frac{\tan \frac{\varphi_{ij}}{2} \tan \frac{\varphi_{jk}}{2} \tan \frac{\varphi_{ik}}{2}} {\sin \frac{S(a,b,c)}{2}}
+\end{eqnarray}
+where the numerator is given by
+\begin{eqnarray} 
+\tan \frac{\varphi_{ij}}{2} \tan \frac{\varphi_{jk}}{2} \tan \frac{\varphi_{ik}}{2} &=& \frac{ \sin \frac{\varphi_{ij}}{2} \sin \frac{\varphi_{jk}}{2} \sin \frac{\varphi_{ik}}{2} }{ \cos \frac{\varphi_{ij}}{2} \cos \frac{\varphi_{jk}}{2} \cos \frac{\varphi_{ik}}{2} } \nonumber \\
+&=& \frac{ \sqrt{( 1- \cos^2 \frac{\varphi_{ij}}{2}) ( 1- \cos^2 \frac{\varphi_{jk}}{2}) ( 1- \cos^2 \frac{\varphi_{ik}}{2}) } } {\sqrt{ \cos^2 \frac{\varphi_{ij}}{2} \cos^2 \frac{\varphi_{jk}}{2} \cos^2 \frac{\varphi_{ik}}{2} }}\nonumber \\
+&=& \frac{ \sqrt{ (1-a) (1-b) (1-c) }} {\sqrt{ abc }} 
+\end{eqnarray}
+and the denominator is given by equation \ref{eqn:sin}. Then,
+\begin{eqnarray}
+\tan(R(a,b,c)) = 2 \sqrt{ \frac{ (1-a) (1-b) (1-c) } {4abc-(a+b+c-1)^2} }
+\end{eqnarray}
+Noting that $\cos^2(x/2) = 0.5(1 + \frac{1}{\sqrt{1+\tan(x)}})$, we get (see \cite{AkEd19b}
+\begin{eqnarray}
+r(a,b,c) = \frac{1}{2} + \frac{1}{2} \sqrt{ \frac{ 4abc - (a+b+c-1)^2} { 4(1-a)(1-b)(1-c) + 4abc - (a+b+c-1)^2}}
+\end{eqnarray}
+Finally, the derivatives of Equations \ref{eqn:sig} are derived by simple chain rules using the analytical expressions for $S(a,b,c)$ and $r(a,b,c)$, as well as the derivatives of the angles $\varphi$ as a function of edge lengths, provided in Equation \ref{eqn:dvarphi}.
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliographystyle{unsrt}
+{\footnotesize
+\bibliography{unionball}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\renewcommand{\theequation}{A.\arabic{equation}} 
+\renewcommand{\thefigure}{A.\arabic{figure}} 
+ % redefine the commands that creates the equation no.   and figure no. 
+ \setcounter{equation}{0} 
+  \setcounter{figure}{0} 
+ 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Appendix A: Partitioning the volume of a tetrahedron}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Let $B_i$, $B_j$, $B_k$ and $B_l$ be four balls with a common intersection.  Their centers define a tetrahedron $T_4$ with faces $T_i$, $T_j$, $T_k$ and $T_l$, defined such that $z_a \notin T_a$ for all $a =i,j,k,l$. 
+We denote the dihedral angle of $T_4$ between the two faces that share the edge $z_i z_j$ as $\phi_{ij:kl}$. Let $F_i$ be the region delimited by the tetrahedron $T_4$ and
+ the three Voronoi planes that separates $B_i$ from $B_j$, $B_k$ and $B_l$.
+ 
+\paragraph{\emph{The volume of $F_i$ is given by :}}
+\begin{eqnarray}
+\Volume{(F_i)} = && \frac{1}{6}(r_i - h_{i;j})r_{i;j}^2 \frac{2\cos{\theta_{ij;k}}\cos{\theta_{ij;l}}-(\cos^2{\theta_{ij;k}}
++\cos^2{\theta_{ij;l})} \cos{\phi_{ij:kl}}}{\sin{\phi_{ij:kl}}} \nonumber \\
+&+& \frac{1}{6}(r_i - h_{i;k})r_{i;k}^2 \frac{2\cos{\theta_{ik;j}}\cos{\theta_{ik;l}}-(\cos^2{\theta_{ik;j}}
++\cos^2{\theta_{ik;l})} \cos{\phi_{ik:jl}}}{\sin{\phi_{ik:jl}}} \nonumber \\
+&+&\frac{1}{6}(r_i - h_{i;l})r_{i;l}^2 \frac{2\cos{\theta_{il;j}}\cos{\theta_{il;k}}-(\cos^2{\theta_{il;j}}
++\cos^2{\theta_{il;k}}) \cos{\phi_{il:jk}}}{\sin{\phi_{il:jl}}}
+\label{eqn:volFi}
+\end{eqnarray}
+\emph{where the angles $\theta$ have been defined in section \ref{sec:threesphere} for the different intersections of three balls. Similar formula for the corresponding volumes $F_j$, $F_k$, and $F_l$ are obtained by permutations of the indices.}
+
+\begin{figure}[hbt]
+      \centerfig{FourBallVol}{width=4.5in}
+\caption{ \textbf{A}. The region $F_i$ (shown in dark grey) corresponds to the intersection of the tetrahedron $T_4$ formed by the centers of the four balls and the three Voronoi planes that separates $B_i$ from the three other balls. $F_i$ is the union of three pyramids, all three with apex $z_i$; their bases lie in the three Voronoi planes; for example, the base of the pyramid corresponding to $B_i$ and $B_j$ is labeled $A_1$. \textbf{B}. $A_1$ is the quadrilateral defined by $y_{i;j}$ (the center of the disk of intersection between $B_i$ and $B_j$), $D_k$ and $D_l$ (the projections of $y_{i;j}$ on the Voronoi planes between $B_i$ and $B_k$ and $B_l$, respectively), and $P_{ijkl}$ the Voronoi vertex dual to the tetrahedron $T_4$. }
+   \label{fig:FourBall}
+\end{figure}
+
+ \paragraph{\emph{Proof.}} 
+
+ The volume of $F_i$ is computed as the sum of the volumes of the three pyramids with apex $z_i$ and bases on the Voronoi planes relative to $B_i$ (see figure \ref{fig:FourBall}):
+ \begin{eqnarray}
+ \Volume{(F_i)} = \frac{1}{3} (r_i - h_{i;j}) \Area{(A_1)}  + \frac{1}{3} (r_i - h_{i;k}) \Area{(A_2)}  + \frac{1}{3} (r_i - h_{i;l}) \Area{(A_3)} 
+ \label{eqn:Fi}
+ \end{eqnarray}
+ The surface area of the base $A_1$ is computed as the difference between the area of the triangles $\Delta y_{i;j}D_l D$ and $\Delta D_k D P_{ijkl}$ (see panel B in figure \ref{fig:FourBall}):
+ \begin{eqnarray}
+ \Area{(A_1}) &=& \frac{1}{2} d_l^2 \tan{ \phi_{ij:kl}} - \frac{1}{2} \left( \frac{d_l}{\cos{\phi_{ij:kl}}} - d_k\right)^2 \frac{1}{\tan{\phi_{ij:kl}}} \nonumber \\
+ &=& \frac{2d_k d_l - (d_k^2+d_l^2) \cos{\phi_{ij}}}{\sin{\phi_{ij:kl}}} 
+ \end{eqnarray}
+ where $d_k = r_{i;j} \cos{\theta_{ij;k}}$ and $d_l = r_{i;j} \cos{\theta_{ij;l}}$ (see figure \ref{fig:threeball}).
+ Similar equations are derived for the areas of $A_2$ and $A_3$. Combining these equations with equation 
+ \ref{eqn:Fi} validates equation \ref{eqn:volFi}. 
+ 
+ Note that:
+\begin{eqnarray}
+F_i + F_j + F_k + F_l = \Volume{(T_4)}
+\end{eqnarray}
+
+
+\renewcommand{\theequation}{B.\arabic{equation}} 
+%\renewcommand{\thefigure}{B.\arabic{figure}} 
+ % redefine the command that creates the equation no.    and figure no.
+ \setcounter{equation}{0} 
+% \setcounter{figure}{0}  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Appendix B: The geometry of a tetrahedron}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ Let us consider the tetrahedron $T$ defined by the four vertices $P_1$, $P_2$, $P_3$ and $P_4$. The four faces of this tetrahedron are $T_1=\Delta P_2P_3P_4$, $T_2 = \Delta P_1P_3P_4$, $T_3 = \Delta P_1P_2P_4$, and $T_4 = \Delta P_1P_2P_3$ and their surface areas are $s_1$, $s_2$, $s_3$ and $s_4$, respectively. We denote the dihedral angle with respect $T_i$ and $T_j$ for $i \neq j = 1,2,3,4$ as $\theta_{ij}$.  The edge between $P_i$ and $P_j$ has length $r_{ij}$, for $i \neq j = 1,2,3,4$.
+ 
+ \subsection*{Surface area and volume}
+ 
+ The Cayley-Menger matrix $M$ associated with $T$ is given by:
+ \begin{eqnarray}
+ M =
+\left (
+ \begin{array}{c c c c c}
+0 & r_{12}^2 &  r_{13}^2  & r_{14}^2 &1\\
+r_{12}^2 & 0 &  r_{23}^2  & r_{24}^2 &1\\
+r_{13}^2 & r_{23}^2 &  0  & r_{34}^2 &1\\
+ r_{14}^2 & r_{24}^2 &  r_{34}^2  & 0 &1\\
+ 1 & 1 & 1 & 1 & 0
+\end{array}
+ \right) .
+ \end{eqnarray}
+ We also define the submatrix $M_{i,j}$ of $M$ obtained by deleting its $i-th$ row and $j-th$ column.
+
+ The volume of the tetrahedron $T$ and the surface areas of its faces can be expressed in terms of the determinants of these matrices:
+ \begin{eqnarray}
+ \Volume{(T)}^2 = \frac{1}{288} \Deter{(M)} \label{eqn:voltet} \\
+ s_i^2 = - \frac{1}{16} \Deter{(M_{i,i})} \label{eqn:volsurftet}
+ \end{eqnarray}
+ 
+ \subsection*{Dihedral angles}
+ 
+The well-known relationship between the volume of a tetrahedron and any of its dihedral angle \cite{Lee97}
+ \begin{eqnarray}
+ V = \frac{2}{3 r_{ij}} s_i s_j \sin \left( \theta_{ij} \right)
+ \label{eqn:volsin}
+ \end{eqnarray}
+ cannot be used directly to compute the latter as it does not distinguish if the angle is obtuse or not.
+ We use instead a result referred to as the law of cosine of dihedrals \cite{Yang89, Yang07}:
+\begin{eqnarray}
+\cos \theta_{ij}  = \frac{ (-1)^{i+j} \Deter{(M_{ij})}}{ 16s_is_j }
+\label{eqn:coslaw}
+\end{eqnarray}
+for $1 \leq i < j \leq 4$. 
+Combining these two equations, we get:
+\begin{eqnarray}
+\cot \theta_{ij} = \frac{\cos \theta_{ij}}{\sin \theta_{ij}} = \frac{1}{24} \frac{ (-1)^{i+j}  \Deter{(M_{ij})} }{r_{ij}V}
+\label{eqn:tetra_ang}
+\end{eqnarray}
+
+\subsection*{Derivatives of the volume of a tetrahedron.}
+{\bf Lemma 4.} \emph{Let T be a non degenerate tetrahedron whose volume is $V$.  The derivative of $V$ with respect to the length $r_{ab}$ of the edge $P_aP_b$ is given by:}
+\begin{eqnarray}
+ \frac{\delta V}{\delta r_{ab}} &=& \frac{1}{6} r_{ab}^2 \cot{ \theta_{ab} }
+ \label{eqn:tetravol_deriv}
+ \end{eqnarray}
+ 
+ \paragraph{\emph{Proof.}} The Cayley-Menger matrix $M$ of a non degenerate tetrahedron $T$ is invertible (if it is not invertible, its determinant is 0 and the volume of the tetrahedron is 0). Let us call $M^{-1}$ the inverse of $M$. Using Jacobi's formula for the differential of a determinant, we get:
+ \begin{eqnarray}
+ \frac{\delta \det (M)}{\delta l_{ab}} &=& \det (M) \Trace {\left( M^{-1} \frac{\delta M}{\delta r_{ab}} \right)}\nonumber \\
+ &=& 4 l_{ab} \det(M) \left(M^{-1}\right)_{ab}
+ \end{eqnarray}
+ where $\left(M^{-1}\right)_{ab}$ is the element of the matrix $M^{-1}$ at row $a$ and column $b$: this element is the co-factor of $M$ corresponding to the positions $(a,b)$, i.e.:
+ \begin{eqnarray}
+ \left(M^{-1}\right)_{ab} = (-1)^{a+b} \frac{\Deter{(M_{ab})}}{\det(M)}.
+ \end{eqnarray}
+ Therefore,
+ \begin{eqnarray}
+ \frac{\delta \det (M)}{\delta r_{ab}} &=& (-1)^{a+b} 4 r_{ab} \Deter{(M_{ab})}
+ \end{eqnarray}
+ 
+Then we have:
+ \begin{eqnarray}
+ \frac{\delta V}{\delta r_{ab}} &=& \frac{1}{576 V} \frac{\delta \det (M)}{\delta r_{ab}} \nonumber \\
+ &=& (-1)^{a+b} \frac{r_{ab}}{144 V} \Deter{(M_{ab})}
+ \end{eqnarray}
+ Combining this equation with the equations \ref{eqn:volsin} and \ref{eqn:coslaw}, we validate equation \ref{eqn:tetravol_deriv}. 
+ 
+ \subsection*{Derivatives of the dihedral angles }
+ 
+ Deriving equation \ref{eqn:tetra_ang} with respect to the length $r_{ab}$ of the edge $P_aP_b$, we get:
+ \begin{eqnarray}
+ -\left(1 + \cot^2{\theta_{ij}} \right) \frac{\delta \theta_{ij}}{\delta r_{ab}} = -\delta_{ij;ab} \frac{\cot{\theta_{ij}}}{l_{ij}} + \frac{2}{3} \frac{(-1)^{i+j}} {l_{ij}V} \frac{\delta \Deter{(M_{ij})}}{\delta r_{ab}} -\frac{l_{ab}^2 \cot \theta_{ij} \cot \theta_{ab}}{6V}
+ \end{eqnarray}
+ where $\delta_{ij;ab}$ is  1 if the pair $(i,j)$ is equal to the pair $(a,b)$ and equal to 0 otherwise.
+
+All terms in this equation are known except for the derivatives of $\Deter{(M_{ij})}$. While we could use Jacobi's formula to compute these derivatives, it is easier to expand the determinant:
+\begin{eqnarray}
+\Deter{(M_{ij})}= 2 r_{ij}^2 ( r_{ik}^2 + r_{il}^2 - r_{kl}^2 ) - (r_{ij}^2+r_{ik}^2-r_{jk}^2)(r_{ij}^2+r_{il}^2-r_{jl}^2)
+\end{eqnarray}
+Its derivatives with respect to each edge length are then straightforward.
+
+
+\end{document}

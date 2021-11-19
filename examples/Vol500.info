@@ -1,0 +1,21 @@
+ 
+Input file                : Vol500.crd
+Number of atoms (balls)   : 0
+Probe radius              : 0
+ 
+Delaunay compute time: 8e-05 seconds
+AlphaCx compute time : 2.7e-05 seconds
+Volumes compute time : 8e-06 seconds
+ 
+Biomolecule from file      : Vol500.crd
+Number of atoms (balls)    : 0
+Probe radius               : 0
+Unweighted surface area    :       0.00000000
+Weighted surface area      :       0.00000000
+Unweighted volume          :       0.00000000
+Weighted volume            :       0.00000000
+Unweighted mean curvature  :       0.00000000
+Weighted mean curvature    :       0.00000000
+Unweighted Gauss curvature :       0.00000000
+Weighted Gauss curvature   :       0.00000000
+ 

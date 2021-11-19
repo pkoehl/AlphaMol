@@ -1,0 +1,21 @@
+ 
+Input file                : mol1.pqr
+Number of atoms (balls)   : 377
+Probe radius              : 1.4
+ 
+Delaunay compute time: 0.002005 seconds
+AlphaCx compute time : 0.00058 seconds
+Volumes compute time : 0.000606 seconds
+ 
+Biomolecule from file      : mol1.pqr
+Number of atoms (balls)    : 377
+Probe radius               : 1.4
+Unweighted surface area    :   20747.02693537
+Weighted surface area      :   20747.02693537
+Unweighted volume          :   48367.92696398
+Weighted volume            :   48367.92696398
+Unweighted mean curvature  :   -4085.28003969
+Weighted mean curvature    :   -4085.28003969
+Unweighted Gauss curvature :    -804.24771932
+Weighted Gauss curvature   :    -804.24771932
+ 

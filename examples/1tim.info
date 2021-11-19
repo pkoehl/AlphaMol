@@ -1,0 +1,21 @@
+ 
+Input file                : 1tim.pdb
+Number of atoms (balls)   : 494
+Probe radius              : 1.4
+ 
+Delaunay compute time: 0.002484 seconds
+AlphaCx compute time : 0.000746 seconds
+Volumes compute time : 0.000712 seconds
+ 
+Biomolecule from file      : 1tim.pdb
+Number of atoms (balls)    : 494
+Probe radius               : 1.4
+Unweighted surface area    :   27430.23156951
+Weighted surface area      :   27430.23156951
+Unweighted volume          :   52712.29004304
+Weighted volume            :   52712.29004304
+Unweighted mean curvature  :   -4973.93813329
+Weighted mean curvature    :   -4973.93813329
+Unweighted Gauss curvature :   -1231.50432021
+Weighted Gauss curvature   :   -1231.50432021
+ 

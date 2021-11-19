@@ -1,0 +1,250 @@
+% Weighted intrinsic volumes of a spacefill diagram
+% Surface Area, Volume, Mean curvature, and Gaussian Curvature
+%
+% Follow up of the work of Arsenyi Akopyan and Herbert Edelsbrunner
+%
+% Re-derive all expression using intrinsic geometry (internal distances) only
+% First version by Patrice, February 2020
+%
+
+\documentclass[11 pt]{article}
+
+\setlength{\textwidth}{6.in}
+\addtolength{\oddsidemargin}{-0.3in}
+\setlength{\topmargin}{-0.8in}
+\setlength{\textheight}{9in}
+
+%\usepackage[acmtitlespace,nocopyright]{acmnew}
+\usepackage{times}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{theorem}
+\usepackage{threeparttable}
+\usepackage{multirow}
+\usepackage{cite}
+\usepackage{color}
+
+\newcommand {\mm}[1] {\ifmmode{#1}\else{\mbox{\(#1\)}}\fi}
+\newcommand {\spc} {\makebox[1em]{ }}
+\newcommand {\ceiling}[1] {{\left\lceil  #1 \right\rceil}}
+\newcommand {\floor}[1] {{\left\lfloor #1 \right\rfloor}}
+\newcommand {\scalprod}[2] {{\langle #1 , #2 \rangle}}
+\newcommand{\denselist}{\itemsep 0pt\parsep=1pt\partopsep 0pt }
+%\renewcommand{\labelitemi}{ }
+
+\theoremstyle{plain} \theorembodyfont{\rmfamily}
+\newtheorem{Thm}{Thm.}[section]
+\newtheorem{Lemma}{Lemma}[section]
+\newtheorem{Cor}{Corollary}[section]
+\newtheorem{Ass}{Assumption}[section]
+
+\newcommand{\proof}{\noindent{\sc Proof.~}}
+\newcommand{\bigO}{\rm O}
+\newcommand{\eop}{\hfill\usebox{\smallProofsym}\bigskip}  %
+\newsavebox{\smallProofsym}                            % smallproofsymbol
+\savebox{\smallProofsym}                               %
+{%                                                     %
+\begin{picture}(6,6)                                   %
+\put(0,0){\framebox(6,6){}}                            %
+\put(0,2){\framebox(4,4){}}                            %
+\end{picture}                                          %
+}                                                      %
+
+%% This makes the legend font small
+\makeatletter
+\long\def\@makecaption#1#2{%
+  \vskip\abovecaptionskip
+  \sbox\@tempboxa{\small #1: #2}%
+  \ifdim \wd\@tempboxa >\hsize
+    \small #1: #2\par
+  \else
+    \global \@minipagefalse
+    \hb@xt@\hsize{\hfil\box\@tempboxa\hfil}%
+  \fi
+  \vskip\belowcaptionskip}
+\makeatother
+
+\newcommand{\Rspace}        {\mm{{\mathbb R}}}
+\newcommand{\tsx}           {\mm{\tau}}
+\newcommand{\usx}           {\mm{\upsilon}}
+
+\newcommand{\AAA}           {\mm{\bf a}}
+\newcommand{\TTT}           {\mm{\bf t}}
+\newcommand{\VVV}           {\mm{\bf v}}
+\newcommand{\MMM}           {\mm{\bf m}}
+\newcommand{\GGG}           {\mm{\bf g}}
+\newcommand{\ZZZ}           {\mm{\bf z}}
+
+\newcommand{\capsp}         {{\; \cap \;}}
+\newcommand{\cupsp}         {{\; \cup \;}}
+\newcommand{\norm}[1]       {\mm{\|{#1}\|}}
+\newcommand{\dist}[2]       {\mm{\|{#1}-{#2}\|}}
+\newcommand{\dista}[2]       {\mm{|{#1}-{#2}|}}
+\newcommand{\wdist}[1]      {\mm{\pi_{#1}}}
+\newcommand{\aff}[1]        {\mm{\rm aff\,}{#1}}
+\newcommand{\conv}[1]       {\mm{\rm conv\,}{#1}}
+\newcommand{\bd}[1]         {\mm{\rm bd\,}{#1}}
+\newcommand{\dime}[1]       {\mm{\rm dim\,}{#1}}
+\newcommand{\card}[1]       {\mm{\rm card\,}{#1}}
+
+\newcommand{\St}[1]         {\mm{\rm St\,}{#1}}
+\newcommand{\Lk}[1]         {\mm{\rm Lk\,}{#1}}
+\newcommand{\length}        {\mm{\rm length}}
+\newcommand{\area}          {\mm{\rm A}}
+\newcommand{\dihed}           {\mm{\rm dihed}}
+\newcommand{\Volume}[1]     {\mm{\rm vol\,}{#1}}
+\newcommand{\Area}[1]       {\mm{\rm area\,}{#1}}
+\newcommand{\Deter}[1]       {\mm{\rm det\,}{#1}}
+\newcommand{\Trace}[1]       {\mm{\rm Tr\,}{#1}}
+\newcommand{\Ad}            {\mm{\rm \; and \;}}
+\newcommand{\upbar}         {\mm{\rm \; | \;}}
+
+\newcommand{\Diff}          {\mm{\rm D}}
+\newcommand{\diff}          {\mm{\rm d}}
+
+\newcommand{\Remark}[1]     {{\sf [#1]}}
+\newcommand{\Sf}[1]         {{\small {\sf #1}}}
+
+% For generating PDF
+%\ifx\pdfoutput\undefined
+%\usepackage[dvips]{graphicx}
+%\else
+\usepackage[pdftex]{graphicx}
+%\usepackage{thumbpdf}
+%\fi
+
+\newcommand{\centerfig}[2]{%
+\centerline{\includegraphics[#2]{Figures/#1}}
+}
+
+
+\title{Weighted Intrinsic Volumes of a Space-Filling Diagram and their derivatives: \\Surface Area, Volume, Mean and Gaussian Curvatures}
+
+\author{Arsenyi Akopyan, Herbert Edelsbrunner,\\
+            IST Austria, \\
+            Klosterneuburg, Austria, \\
+                 e-mail: akopjan@gmail.com, edels@ist.ac.at,\\ \\
+        \and Patrice Koehl\\
+            Department of Computer Science, \\
+            University of California, Davis, CA 95616.\\
+                 e-mail: koehl@cs.ucdavis.edu
+        }
+
+\begin{document}
+\maketitle
+
+\newpage
+
+%%
+%% Abstract 
+%%
+%\begin{abstract}
+%{\rm
+%}
+%\end{abstract}
+
+%\vspace{0.1in}
+%{\small
+% \noindent{\bf Keywords.}
+%  space-filling diagrams, intrinsic volumes,
+%  surface area, volume, mean curvature, Gaussian curvature, 
+%  derivatives, macromolecules.
+%}
+
+%\newpage
+
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Derivatives of the coefficients in the weighted intrinsic Gaussian curvature derivatives}
+\label{sec:others}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+   \subsection{Derivatives of $\sigma_{i:jk}$}
+   
+   The weighted Gaussian curvature includes three terms that account for the spherical patches, the circular arcs between spheres, and corners. While the first two terms are akin to terms found in the weighted surface area and the weighted volume functions (term 1), and in the mean curvature function (term 2), the corner term is specific to Gaussian curvatures. It comes into consideration for all faces in the dual complex. 
+   
+  Let us consider one such face,  corresponding to the three vertices $z_i$, $z_j$, and $z_k$ that are centers of the three spheres $S_i$, $S_j$, and $S_k$, respectively.
+  Those three spheres intersect at two corners, $P_{ijk}$ and $P_{ikj}$ that both contribute to the Gaussian curvature. As the spheres have different radii, we need a scheme to compute the contribution of each corner to the Gaussian curvature, to divide this contribution among the three spheres, and to compute the derivatives of the corresponding sphere-specific contribution. In agreement with the general approach used in this paper, all those contributions and derivatives will be expressed as functions of the inter-vertex distances, namely $r_{ij}$, $r_{jk}$, and $r_{ik}$. These formulas have been derived in \cite{AkEd19b}. 
+  
+  \begin{figure}[hbt]
+\centerfig{Spherical_new}{height=2.5in}
+\caption{ \textbf{Contribution of a corner of the space-filling diagram to the Gaussian curvature.} We consider three intersecting spheres $S_i$, $S_j$, and $S_k$ and one of the two points common to the three spheres, $P_{ijk}$. \textbf{A)} The outward unit normals $n_i$, $n_j$, and $n_k$ of the three spheres at this point form a spherical triangle whose area is the contribution of $P_{ijk}$ to the Gaussian curvature. To divide this contribution among the three spheres, we consider the cap with center $z$ whole boundary is the unique circle that passes through the three vertices $n_i$, $n_j$, and $n_k$. Based on $z$, the spherical triangle is divided into three spherical triangles, $A_{jk} = \Delta n_j z n_k$, $A_{ik}=\Delta n_i z n_k$, and $A_{ij}=\Delta n_i z n_j$. \textbf{A)} The spherical triangle can also be divided into three quadrangles by considering the midpoints $m$ of the three sides. The area $\sigma_{i:jk}$ is the contribution of the Gaussian curvature at $P_{ijk}$ to the sphere $S_i$. Note that the center $z$ of the circumcircle may be outside of the spherical triangle $n_i n_j n_k$.}
+\label{fig:Spherical}
+\end{figure}
+
+  Let us consider the corner $P_{ijk}$ and let $n_i$, $n_j$, and $n_k$ be the unit outward normals of the spheres at $P_{ijk}$. The total contribution of this corner to the Gaussian curvature is equal to the area $\sigma_{ijk}$ of the spherical triangle $\Delta n_i n_j n_k$ with vertices $n_i$, $n_j$, and $n_k$ on the unit sphere (see Figure \ref{fig:Spherical}).   The geodesic lengths of the side of $ST$ are $\varphi_{ij}$, $\varphi_{jk}$, and $\varphi_{ik}$.  We first establish the following property,
+\paragraph{Proposition 1.} \emph{Let $T$ be a geodesic spherical triangle with side lengths $\alpha$, $\beta$, and $\gamma$, and let $a=\cos^2(\alpha/2)$, $b=\cos^2(\beta/2)$, and $c=\cos^2(\gamma)$. The surface area of this triangle, defined as $S(a,b,c)$, is given by}
+  \begin{eqnarray}
+  S(a,b,c) = 2 \arcsin{\sqrt{ \frac{4abc - (a+b+c-1)^2}{4abc} } }.
+  \end{eqnarray}
+  \paragraph{\emph{Proof.}} Appendix A of \cite{AkEd19b}, or my previous notes.
+  
+ As a consequence of property 5, $\sigma_{ijk}=S(a,b,c)$ where $a=\cos^2(\varphi_{ij}/2)$, $b=\cos^2(\varphi_{jk}/2)$, and $c=\cos^2(\varphi_{ik}/2)$. $\sigma_{ijk}$ represents the total contribution of the corner $P_{ijk}$ to the Gaussian curvature. As the three spheres $S_i$, $S_j$, and $S_k$ have different weights, we break down this contribution to individual contributions of the spheres:
+ \begin{eqnarray} 
+  \sigma_{ijk} &=& \omega_i \sigma_{ijk}  + \omega_j \sigma_{ijk} + \omega_k \sigma_{ijk} \nonumber \\
+  &=& \sigma_{i:jk}  +  \sigma_{j:ki} +  \sigma_{k: ij} 
+ \end{eqnarray}
+where the partitioning is based on the position of the spherical circumcenter $z$ of $n_i$, $n_j$, and $n_k$ (see \ref{fig:Spherical} for details).   Based on $z$, the spherical triangle is divided into three spherical triangles, $A_{jk} = \Delta n_j z n_k$, $A_{ik}=\Delta n_i z n_k$, and $A_{ij}=\Delta n_i z n_j$. If $R(a,b,c)$ is the spherical radius of the circumcircle of $n_i$, $n_j$, and $n_k$, and if we define $r(a,b,c)=\cos^2(R(a,b,c)/2)$, we have the following properties
+\begin{eqnarray}
+\text{area}(A_{ij}) &=& A(a,r) = S(a,r,r) \nonumber \\
+\text{area}(A_{jk})  &=& B(b,r) = S(r,b,r) \nonumber \\
+\text{area}(A_{ik})  &=& C(c,r) = S(r,r,c) 
+\end{eqnarray}
+Second, we define $m_i$, $m_j$, and $m_k$ as the midpoints of $z_j z_k$, $z_i z_k$, and $z_i z_j$, respectively. The triangle $\Delta n_i n_j n_k$ is then subdivided into three quadrangles, $n_i m_k z m_j$, $n_j m_k z m_i$, and $n_k m_j z m_i$, with surface areas $\sigma_{i:jk}$, $\sigma_{j:ik}$, and $\sigma_{k:ij}$, respectively. To establish the correspondence between the areas of the triangles $A$ and the areas $\sigma$, we need to take into account the possibility that the circumcenter $z$ falls outside of the triangle $\Delta n_i n_j n_k$. This occurs when $n_i$ and $z$ lies on opposite side of the side $n_j n_k$. The boundary case, i.e. $z$ lies on $n_j n_k$ occurs when $\sin^2 (\varphi_{ij}/2) + \sin^2 (\varphi_{ik}/2) = \sin^2 (\varphi_{jk}/2)$, or equivalently when $a + c = 1 + b$ (see \cite{AkEd19b} for details). When $a+c \le 1 +b$, $n_i$ and $c$ lie on the same side of $n_j n_k$. We define
+\begin{eqnarray}
+sign(i,jk) = \begin{cases}
++1 &\text{if $a+c \le b$}\\
+-1 &\text{otherwise}
+\end{cases}
+\end{eqnarray}
+Using this sign function, we get:
+\begin{eqnarray}
+\sigma_{i:jk} = \frac{1}{2} \left[ sign(k,ij) A(a,r) + sign(j,ik) C(c,r)\right] \nonumber \\
+\sigma_{j:ik} = \frac{1}{2} \left[ sign(i,jk) B(b,r) + sign(k,ij) A(a,r) \right] \nonumber \\
+\sigma_{k:ij} = \frac{1}{2} \left[ sign(i,jk) C(c,r) + sign(j,ik) B(b,r) \right]
+\label{eqn:sig}
+\end{eqnarray}
+
+To compute the derivatives of the different surface areas $\sigma_{i:jk}$, $\sigma_{j:ik}$, and $\sigma_{k:ij}$, we need the derivatives of the areas $A(a,r)$, $B(b,r)$ and $C(c,r)$.
+Note that those terms are all computed as surface areas of spherical triangles,  given by proposition 1. Akopyan and Edelsbrunner had shown that (equation 21 in \cite{AkEd19b}):
+\begin{eqnarray}
+\frac{dS(a,b,c)} {da} = \frac{ -a + b + c -1}{a \sqrt{ 4abc - (a+b+c-1)^2}}
+\end{eqnarray}
+Using proposition 1, we rewrite it as:
+\begin{eqnarray}
+\frac{dS(a,b,c)} {da} =\frac{ -a + b + c -1}{a \sqrt{4abc} \sin\left( \frac{S(a,b,c)}{2} \right) }
+\label{eqn:dS}
+\end{eqnarray}
+
+\subsection{Numerical problems}
+
+Problems occur when the center $z$ of the cap whose boundary passes through $n_i$, $n_j$, and $n_k$ is found to be exactly on one of the edges of the spherical triangle defined by $n_i$, $n_j$, and $n_k$. Let us assume for example that $z$ is on the edge $n_i n_j$. Then $A(a,r) = 0$. According to equation \ref{eqn:dS}, however,
+\begin{eqnarray}
+\frac{dA(a,r)} {da} =\frac{ -a + 2r -1}{a \sqrt{4ar^2} \sin\left( \frac{A(a,r)}{2} \right) }
+\label{eqn:dA}
+\end{eqnarray}
+As $A(a,r)$ is zero, we cannot use this formula. However, we can get around it!
+
+Note first that in this case, none of the terms $S(a,b,c)$, $B(b,r)$ and $C(c,r)$ can be zero. Therefore, we can compute their derivatives. Then, remember that:
+\begin{eqnarray}
+S(a,b,c) = sign(k,ij) A(a,r) + sign(i,jk) B(b,r) + sign(j,ik) C(c,r)
+\end{eqnarray}
+Using this equation, we derive
+\begin{eqnarray}
+sign(k,ij) \frac{dA(a,r)}{da} = \frac{dS(a,b,c)}{da} - sign(i,jk) \frac{dB(b,r)}{da} -  sign(j,ik) \frac{dC(c,r)}{da}
+\end{eqnarray}
+with similar expressions for the derivatives with respect to $b$ and $c$.
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliographystyle{unsrt}
+{\footnotesize
+\bibliography{unionball}
+}
+
+
+\end{document}
