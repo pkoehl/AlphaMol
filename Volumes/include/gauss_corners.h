@@ -155,7 +155,6 @@
   {
 
 	double cos_ab, cos_ac, cos_bc;
-	double sin_ab, sin_ac, sin_bc;
 	double da_ab, db_bc, dc_ac;
 	double a, b, c;
 	double r;
@@ -168,22 +167,25 @@
 	double dSc_dab, dSc_dac, dSc_dbc;
 
 	cos_ab = (ra2+rb2-rab2)/(2.0*ra*rb);
-	sin_ab = std::sqrt(1-cos_ab*cos_ab);
 	a = 0.5*(cos_ab+1);
 
 	cos_bc = (rb2+rc2-rbc2)/(2.0*rb*rc);
-	sin_bc = std::sqrt(1-cos_bc*cos_bc);
 	b = 0.5*(cos_bc+1);
 
 	cos_ac = (ra2+rc2-rac2)/(2.0*ra*rc);
-	sin_ac = std::sqrt(1-cos_ac*cos_ac);
 	c = 0.5*(cos_ac+1);
 
 	sign_a = sign(a, c, b);
 	sign_b = sign(a, b, c);
 	sign_c = sign(c, b, a);
 
+	der_r[0] = 0; der_r[1] = 0; der_r[2] = 0;
 	r = trig_dradius(a, b, c, der_r, option);
+
+	der_S[0] = 0; der_S[1] = 0; der_S[2] = 0;
+	der_Sa[0] = 0; der_Sa[1] = 0; der_Sa[2] = 0;
+	der_Sb[0] = 0; der_Sb[1] = 0; der_Sb[2] = 0;
+	der_Sc[0] = 0; der_Sc[1] = 0; der_Sc[2] = 0;
 
 	S  = trig_darea(a, b, c, der_S, option);
 	Sa = trig_darea(a, r, r, der_Sa, option);
