@@ -31,6 +31,8 @@
 #include <bitset>
 #include <stack>
 #include "jlcxx/jlcxx.hpp"
+#include "jlcxx/array.hpp"
+#include "jlcxx/tuple.hpp"
 
 /* ===============================================================================================
    Local includes
@@ -59,8 +61,5 @@ VOLUMES volumes;
 static void usage(char** argv);
 bool parse_args(int argc, char **argv, std::string *INfile, int *flag_CA, 
 	double *r_h2o, int *flag_deriv, std::string *OUTfile);
-
-void calculate_measures(jlcxx::ArrayRef<double> outs, const jlcxx::ArrayRef<double> in_coordinates, const jlcxx::ArrayRef<double> in_radii, const double in_coefS, const double in_coefV, const double in_coefM, const double in_coefG, int8_t flag_deriv, int8_t info_out_flag);
-
 
 #endif

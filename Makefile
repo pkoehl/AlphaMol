@@ -111,19 +111,6 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named AlphaMol
-
-# Build rule for target.
-AlphaMol: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 AlphaMol
-.PHONY : AlphaMol
-
-# fast build rule for target.
-AlphaMol/fast:
-	$(MAKE) -f CMakeFiles/AlphaMol.dir/build.make CMakeFiles/AlphaMol.dir/build
-.PHONY : AlphaMol/fast
-
-#=============================================================================
 # Target rules for targets named AlphaMolStatic
 
 # Build rule for target.
@@ -136,14 +123,27 @@ AlphaMolStatic/fast:
 	$(MAKE) -f CMakeFiles/AlphaMolStatic.dir/build.make CMakeFiles/AlphaMolStatic.dir/build
 .PHONY : AlphaMolStatic/fast
 
+#=============================================================================
+# Target rules for targets named AlphaMol
+
+# Build rule for target.
+AlphaMol: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 AlphaMol
+.PHONY : AlphaMol
+
+# fast build rule for target.
+AlphaMol/fast:
+	$(MAKE) -f CMakeFiles/AlphaMol.dir/build.make CMakeFiles/AlphaMol.dir/build
+.PHONY : AlphaMol/fast
+
 project/src/AlphaMol.o: project/src/AlphaMol.cpp.o
 
 .PHONY : project/src/AlphaMol.o
 
 # target to build an object file
 project/src/AlphaMol.cpp.o:
-	$(MAKE) -f CMakeFiles/AlphaMol.dir/build.make CMakeFiles/AlphaMol.dir/project/src/AlphaMol.cpp.o
 	$(MAKE) -f CMakeFiles/AlphaMolStatic.dir/build.make CMakeFiles/AlphaMolStatic.dir/project/src/AlphaMol.cpp.o
+	$(MAKE) -f CMakeFiles/AlphaMol.dir/build.make CMakeFiles/AlphaMol.dir/project/src/AlphaMol.cpp.o
 .PHONY : project/src/AlphaMol.cpp.o
 
 project/src/AlphaMol.i: project/src/AlphaMol.cpp.i
@@ -152,8 +152,8 @@ project/src/AlphaMol.i: project/src/AlphaMol.cpp.i
 
 # target to preprocess a source file
 project/src/AlphaMol.cpp.i:
-	$(MAKE) -f CMakeFiles/AlphaMol.dir/build.make CMakeFiles/AlphaMol.dir/project/src/AlphaMol.cpp.i
 	$(MAKE) -f CMakeFiles/AlphaMolStatic.dir/build.make CMakeFiles/AlphaMolStatic.dir/project/src/AlphaMol.cpp.i
+	$(MAKE) -f CMakeFiles/AlphaMol.dir/build.make CMakeFiles/AlphaMol.dir/project/src/AlphaMol.cpp.i
 .PHONY : project/src/AlphaMol.cpp.i
 
 project/src/AlphaMol.s: project/src/AlphaMol.cpp.s
@@ -162,8 +162,8 @@ project/src/AlphaMol.s: project/src/AlphaMol.cpp.s
 
 # target to generate assembly for a file
 project/src/AlphaMol.cpp.s:
-	$(MAKE) -f CMakeFiles/AlphaMol.dir/build.make CMakeFiles/AlphaMol.dir/project/src/AlphaMol.cpp.s
 	$(MAKE) -f CMakeFiles/AlphaMolStatic.dir/build.make CMakeFiles/AlphaMolStatic.dir/project/src/AlphaMol.cpp.s
+	$(MAKE) -f CMakeFiles/AlphaMol.dir/build.make CMakeFiles/AlphaMol.dir/project/src/AlphaMol.cpp.s
 .PHONY : project/src/AlphaMol.cpp.s
 
 # Help Target
@@ -174,8 +174,8 @@ help:
 	@echo "... depend"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
-	@echo "... AlphaMol"
 	@echo "... AlphaMolStatic"
+	@echo "... AlphaMol"
 	@echo "... project/src/AlphaMol.o"
 	@echo "... project/src/AlphaMol.i"
 	@echo "... project/src/AlphaMol.s"

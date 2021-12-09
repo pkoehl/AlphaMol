@@ -289,173 +289,175 @@ bool parse_args(int argc, char **argv, std::string *INfile, int *flag_ca, double
 	return true;
 }
 
-void calculate_measures(jlcxx::ArrayRef<double> outs, const jlcxx::ArrayRef<double> in_coordinates, const jlcxx::ArrayRef<double> in_radii, const double in_coefS, const double in_coefV, const double in_coefM, const double in_coefG, int8_t flag_deriv, int8_t info_out_flag)
-{
-    std::vector<Atoms> atoms;
-
-    for(int i = 0; i < in_coordinates.size()/3; i++) {
-        Atoms atm(in_coordinates[i*3],
-                  in_coordinates[(i*3)+1],
-                  in_coordinates[(i*3)+2],
-                  in_radii[i],
-                  1.0, 1.0, 1.0, 1.0);
-        atoms.push_back(atm);
-    }
-    if(info_out_flag >= 1) {
-        std::cout << " " << std::endl;
-        std::cout << "Number of atoms (balls)   : " << atoms.size() << std::endl;
-        std::cout << " " << std::endl;
-    }
-
-    /*	==========================================================================================
-        Compute Delaunay triangulation
-        ========================================================================================== */
-
-    clock_t start_s, stop_s;
-
-    DELCX delcx;
-    ALFCX alfcx;
-    VOLUMES volumes;
-
-    std::vector<Vertex> vertices;
-    std::vector<Tetrahedron> tetra;
-
-    int natoms = atoms.size();
-
-    double *coord = new double[3*natoms];
-    double *radii = new double[natoms];
-    double *coefS = new double[natoms];
-    double *coefV = new double[natoms];
-    double *coefM = new double[natoms];
-    double *coefG = new double[natoms];
-
-
-
-    for(int i = 0; i < natoms; i++) {
-    for(int j = 0; j < 3; j++){
-    coord[3*i+j] = atoms[i].Coordinates[j];
-    }
-    radii[i] = atoms[i].Radius;
-    coefS[i] = in_coefS;
-    coefV[i] = in_coefV;
-    coefM[i] = in_coefM;
-    coefG[i] = in_coefG;
-    }
-
-    delcx.setup(natoms, coord, radii, coefS, coefV, coefM, coefG, vertices, tetra);
-
-    if(info_out_flag >= 1) {
-        start_s = clock();
-    }
-
-    delcx.regular3D(vertices, tetra);
-
-    if(info_out_flag >= 1) {
-        stop_s = clock();
-        std::cout << "Delaunay compute time: " << (stop_s-start_s)/double(CLOCKS_PER_SEC) << " seconds" << std::endl;
-    }
-
-
-    /*	==========================================================================================
-        Generate alpha complex (with alpha=0.0)
-        ========================================================================================== */
-    if(info_out_flag >= 1) {
-        start_s = clock();
-    }
-
-    double alpha = 0;
-    alfcx.alfcx(alpha, vertices, tetra);
-
-    if(info_out_flag >= 1) {
-        stop_s = clock();
-        std::cout << "AlphaCx compute time : " << (stop_s - start_s) / double(CLOCKS_PER_SEC) << " seconds"
-                  << std::endl;
-    }
-    /*	==========================================================================================
-        Compute surface area and, optionally volume of the union of balls.
-        If requested, compute also their derivatives
-        ========================================================================================== */
-
-    std::vector<Edge> edges;
-    std::vector<Face> faces;
-    alfcx.alphacxEdges(tetra, edges);
-    alfcx.alphacxFaces(tetra, faces);
-
-    double Surf, WSurf, Vol, WVol, Mean, WMean, Gauss, WGauss;
-
-    double *ballwsurf = new double[natoms+4];
-    double *dsurf = new double[3*(natoms+4)];
-    double *dsurf_num = new double[3*(natoms+4)];
-    memset(dsurf, 0, 3*(natoms+4)*sizeof(double));
-    memset(dsurf_num, 0, 3*(natoms+4)*sizeof(double));
-
-    double *ballwvol, *dvol;
-    double *dvol_num;
-    ballwvol = new double[natoms+4];
-    dvol = new double[3*(natoms+4)];
-    dvol_num = new double[3*(natoms+4)];
-    memset(dvol, 0, 3*(natoms+4)*sizeof(double));
-    memset(dvol_num, 0, 3*(natoms+4)*sizeof(double));
-
-    double *ballwmean, *dmean;
-    double *dmean_num;
-    ballwmean = new double[natoms+4];
-    dmean = new double[3*(natoms+4)];
-    dmean_num = new double[3*(natoms+4)];
-    memset(dmean, 0, 3*(natoms+4)*sizeof(double));
-    memset(dmean_num, 0, 3*(natoms+4)*sizeof(double));
-
-    double *ballwgauss, *dgauss;
-    double *dgauss_num;
-    ballwgauss = new double[natoms+4];
-    dgauss = new double[3*(natoms+4)];
-    dgauss_num = new double[3*(natoms+4)];
-    memset(dgauss, 0, 3*(natoms+4)*sizeof(double));
-    memset(dgauss_num, 0, 3*(natoms+4)*sizeof(double));
-
-    if(info_out_flag >= 1) {
-        start_s = clock();
-    }
-
-    volumes.ball_dvolumes(vertices, tetra, edges, faces, &WSurf, &WVol,
-            &WMean, &WGauss, &Surf, &Vol, &Mean, &Gauss, ballwsurf, ballwvol,
-            ballwmean, ballwgauss, dsurf, dvol, dmean, dgauss, flag_deriv);
-
-    if(info_out_flag >= 1) {
-        stop_s = clock();
-        std::cout << "Volumes compute time : " << (stop_s - start_s) / double(CLOCKS_PER_SEC) << " seconds"
-                  << std::endl;
-    }
-
-    if(info_out_flag >= 2) {
-        std::cout << " " << std::endl;
-        std::cout << "Unweighted surface area    : " << std::setw(16) << std::fixed << std::setprecision(8) << Surf
-                  << std::endl;
-        std::cout << "Weighted surface area      : " << std::setw(16) << std::fixed << std::setprecision(8) << WSurf
-                  << std::endl;
-        std::cout << "Unweighted volume          : " << std::setw(16) << std::fixed << std::setprecision(8) << Vol
-                  << std::endl;
-        std::cout << "Weighted volume            : " << std::setw(16) << std::fixed << std::setprecision(8) << WVol
-                  << std::endl;
-        std::cout << "Unweighted mean curvature  : " << std::setw(16) << std::fixed << std::setprecision(8) << Mean
-                  << std::endl;
-        std::cout << "Weighted mean curvature    : " << std::setw(16) << std::fixed << std::setprecision(8) << WMean
-                  << std::endl;
-        std::cout << "Unweighted Gauss curvature : " << std::setw(16) << std::fixed << std::setprecision(8) << Gauss
-                  << std::endl;
-        std::cout << "Weighted Gauss curvature   : " << std::setw(16) << std::fixed << std::setprecision(8) << WGauss
-                  << std::endl;
-        std::cout << " " << std::endl;
-    }
-
-    outs[0] = Surf;
-    outs[1] = Vol;
-    outs[2] = Mean;
-    outs[3] = Gauss;
-}
-
 
 JLCXX_MODULE define_julia_module(jlcxx::Module& mod)
 {
-    mod.method("calculate_measures",  &calculate_measures);
+    mod.method("calculate_measures",  [](jlcxx::ArrayRef<double> outs, const jlcxx::ArrayRef<double> in_coordinates, const jlcxx::ArrayRef<double> in_radii, const double in_coefS, const double in_coefV, const double in_coefM, const double in_coefG, const int8_t flag_deriv, const int8_t info_out_flag){
+        std::vector<Atoms> atoms;
+        for(int i = 0; i < in_coordinates.size()/3; i++) {
+            Atoms atm(in_coordinates[i*3],
+                      in_coordinates[(i*3)+1],
+                      in_coordinates[(i*3)+2],
+                      in_radii[i],
+                      1.0, 1.0, 1.0, 1.0);
+            atoms.push_back(atm);
+        }
+        if(info_out_flag >= 1) {
+            std::cout << " " << std::endl;
+            std::cout << "Number of atoms (balls)   : " << atoms.size() << std::endl;
+            std::cout << " " << std::endl;
+        }
+
+        /*	==========================================================================================
+            Compute Delaunay triangulation
+            ========================================================================================== */
+
+        clock_t start_s, stop_s;
+
+        std::vector<Vertex> vertices;
+        std::vector<Tetrahedron> tetra;
+
+        int natoms = atoms.size();
+
+        double *coord = new double[3*natoms];
+        double *radii = new double[natoms];
+        double *coefS = new double[natoms];
+        double *coefV = new double[natoms];
+        double *coefM = new double[natoms];
+        double *coefG = new double[natoms];
+
+
+
+        for(int i = 0; i < natoms; i++) {
+            for(int j = 0; j < 3; j++){
+                coord[3*i+j] = atoms[i].Coordinates[j];
+            }
+            radii[i] = atoms[i].Radius;
+            coefS[i] = 1.0;
+            coefV[i] = 1.0;
+            coefM[i] = 1.0;
+            coefG[i] = 1.0;
+        }
+
+        delcx.setup(natoms, coord, radii, coefS, coefV, coefM, coefG, vertices, tetra);
+
+        if(info_out_flag >= 1) {
+            start_s = clock();
+        }
+
+        delcx.regular3D(vertices, tetra);
+
+        if(info_out_flag >= 1) {
+            stop_s = clock();
+            std::cout << "Delaunay compute time: " << (stop_s-start_s)/double(CLOCKS_PER_SEC) << " seconds" << std::endl;
+        }
+
+
+        /*	==========================================================================================
+            Generate alpha complex (with alpha=0.0)
+            ========================================================================================== */
+        if(info_out_flag >= 1) {
+            start_s = clock();
+        }
+
+        double alpha = 0;
+        alfcx.alfcx(alpha, vertices, tetra);
+
+        if(info_out_flag >= 1) {
+            stop_s = clock();
+            std::cout << "AlphaCx compute time : " << (stop_s - start_s) / double(CLOCKS_PER_SEC) << " seconds"
+                      << std::endl;
+        }
+        /*	==========================================================================================
+            Compute surface area and, optionally volume of the union of balls.
+            If requested, compute also their derivatives
+            ========================================================================================== */
+
+        std::vector<Edge> edges;
+        std::vector<Face> faces;
+        alfcx.alphacxEdges(tetra, edges);
+        alfcx.alphacxFaces(tetra, faces);
+
+        double Surf, WSurf, Vol, WVol, Mean, WMean, Gauss, WGauss;
+
+        int nfudge = 8;
+        double *ballwsurf = new double[natoms+nfudge];
+        double *dsurf = new double[3*(natoms+nfudge)];
+        memset(dsurf, 0, 3*(natoms+nfudge)*sizeof(double));
+
+        double *ballwvol, *dvol;
+        ballwvol = new double[natoms+nfudge];
+        dvol = new double[3*(natoms+nfudge)];
+        memset(dvol, 0, 3*(natoms+nfudge)*sizeof(double));
+
+        double *ballwmean, *dmean;
+        ballwmean = new double[natoms+nfudge];
+        dmean = new double[3*(natoms+nfudge)];
+        memset(dmean, 0, 3*(natoms+nfudge)*sizeof(double));
+
+        double *ballwgauss, *dgauss;
+        ballwgauss = new double[natoms+nfudge];
+        dgauss = new double[3*(natoms+nfudge)];
+        memset(dgauss, 0, 3*(natoms+nfudge)*sizeof(double));
+
+        if(info_out_flag >= 1) {
+            start_s = clock();
+        }
+
+        volumes.ball_dvolumes(vertices, tetra, edges, faces, &WSurf, &WVol,
+                              &WMean, &WGauss, &Surf, &Vol, &Mean, &Gauss, ballwsurf, ballwvol,
+                              ballwmean, ballwgauss, dsurf, dvol, dmean, dgauss, flag_deriv);
+
+        if(info_out_flag >= 1) {
+            stop_s = clock();
+            std::cout << "Volumes compute time : " << (stop_s - start_s) / double(CLOCKS_PER_SEC) << " seconds"
+                      << std::endl;
+        }
+
+        if(info_out_flag >= 2) {
+            std::cout << " " << std::endl;
+            std::cout << "Unweighted surface area    : " << std::setw(16) << std::fixed << std::setprecision(8) << Surf
+                      << std::endl;
+            std::cout << "Weighted surface area      : " << std::setw(16) << std::fixed << std::setprecision(8) << WSurf
+                      << std::endl;
+            std::cout << "Unweighted volume          : " << std::setw(16) << std::fixed << std::setprecision(8) << Vol
+                      << std::endl;
+            std::cout << "Weighted volume            : " << std::setw(16) << std::fixed << std::setprecision(8) << WVol
+                      << std::endl;
+            std::cout << "Unweighted mean curvature  : " << std::setw(16) << std::fixed << std::setprecision(8) << Mean
+                      << std::endl;
+            std::cout << "Weighted mean curvature    : " << std::setw(16) << std::fixed << std::setprecision(8) << WMean
+                      << std::endl;
+            std::cout << "Unweighted Gauss curvature : " << std::setw(16) << std::fixed << std::setprecision(8) << Gauss
+                      << std::endl;
+            std::cout << "Weighted Gauss curvature   : " << std::setw(16) << std::fixed << std::setprecision(8) << WGauss
+                      << std::endl;
+            std::cout << " " << std::endl;
+        }
+        outs[0] = Surf;
+        outs[1] = Vol;
+        outs[2] = Mean;
+        outs[3] = Gauss;
+
+        delete [] coord;
+        delete [] radii;
+        delete [] coefS;
+        delete [] coefV;
+        delete [] coefM;
+        delete [] coefG;
+        delete [] ballwsurf;
+        delete [] dsurf;
+        delete [] ballwvol;
+        delete [] dvol;
+        delete [] ballwmean;
+        delete [] dmean;
+        delete [] ballwgauss;
+        delete [] dgauss;
+
+//        delcx.~DELCX();
+//        alfcx.~ALFCX();
+//        volumes.~VOLUMES();
+    });
+
 }
+
