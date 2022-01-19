@@ -214,6 +214,9 @@ int main(int argc, char **argv)
 
 	}
 */
+	delete [] coord; delete [] radii; delete [] coefS; delete [] coefV; delete [] coefM; delete [] coefG;
+	delete [] ballwsurf; delete [] dsurf; delete [] ballwvol; delete [] dvol;
+	delete [] ballwmean; delete [] dmean; delete [] ballwgauss; delete [] dgauss;
 
 	return 0;
 
