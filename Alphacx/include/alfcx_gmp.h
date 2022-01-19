@@ -1131,15 +1131,10 @@ void ALFCX_GMP::clear_alf_gmp()
 			mpz_clear(Mac[i][j]);
 			mpz_clear(Mbc[i][j]);
 			mpz_clear(S[i][j]);
-		}
-	}
-	for (i= 0; i < 3; i++)
-	{
-		for (j=0; j < 4; j++)
-		{
 			mpz_clear(T[i][j]);
 		}
 	}
+	
 	mpz_clear (r_14); mpz_clear (r_313); mpz_clear (r_212);
 	mpz_clear (det1); mpz_clear (det2); mpz_clear (det3); mpz_clear (det4); 
 	mpz_clear (wa); mpz_clear(wb); mpz_clear(wc); mpz_clear(wd);
