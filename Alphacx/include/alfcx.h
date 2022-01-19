@@ -1146,6 +1146,7 @@
 
 	std::bitset<6> *tetra_mask = new std::bitset<6>[ntetra];
 	std::bitset<6> zero(std::string("000000"));
+	  
 	for(int i = 0; i < ntetra; i++) tetra_mask[i] = zero;
 
 	for (int i = 0; i < ntetra; i++) {
@@ -1457,7 +1458,7 @@
 	std::cout << "Number of vertices in Alpha complex     : " << nvert << std::endl;
 	std::cout << std::endl;
 */
-
+	delete [] tetra_mask;
 	alf_gmp.clear_alf_gmp();
 
   }
