@@ -392,6 +392,8 @@
 			vert.status = 0;
 			vertices.push_back(vert);
 		}
+		delete [] bcoord;
+		delete [] brad;
 	}
 
 /* ====================================================================
