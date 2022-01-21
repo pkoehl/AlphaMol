@@ -205,7 +205,8 @@ int main(int argc, char **argv)
 	std::cout << "Unweighted Gauss curvature : " << std::setw(16) << std::fixed << std::setprecision(8) << Gauss << std::endl;
 	std::cout << "Weighted Gauss curvature   : " << std::setw(16) << std::fixed << std::setprecision(8) << WGauss << std::endl;
 	std::cout << " " << std::endl;
-/*		
+
+    /*
 	if(flag_deriv == 1) {
 
 		std::cout << "Compare analytical with numerical derivatives: " << std::endl;
@@ -214,6 +215,10 @@ int main(int argc, char **argv)
 
 	}
 */
+
+    delete [] coord; delete [] radii; delete [] coefS; delete [] coefV; delete [] coefM; delete [] coefG;
+    delete [] ballwsurf; delete [] dsurf; delete [] ballwvol; delete [] dvol;
+    delete [] ballwmean; delete [] dmean; delete [] ballwgauss; delete [] dgauss;
 
 	return 0;
 
@@ -290,8 +295,10 @@ bool parse_args(int argc, char **argv, std::string *INfile, int *flag_ca, double
 }
 
 
+
 JLCXX_MODULE define_julia_module(jlcxx::Module& mod)
 {
+
     mod.method("calculate_measures",  [](jlcxx::ArrayRef<double> outs, const jlcxx::ArrayRef<double> in_coordinates, const jlcxx::ArrayRef<double> in_radii, const double in_coefS, const double in_coefV, const double in_coefM, const double in_coefG, const int8_t flag_deriv, const int8_t info_out_flag){
         std::vector<Atoms> atoms;
         for(int i = 0; i < in_coordinates.size()/3; i++) {
@@ -434,30 +441,18 @@ JLCXX_MODULE define_julia_module(jlcxx::Module& mod)
                       << std::endl;
             std::cout << " " << std::endl;
         }
+
         outs[0] = Surf;
         outs[1] = Vol;
         outs[2] = Mean;
         outs[3] = Gauss;
 
-        delete [] coord;
-        delete [] radii;
-        delete [] coefS;
-        delete [] coefV;
-        delete [] coefM;
-        delete [] coefG;
-        delete [] ballwsurf;
-        delete [] dsurf;
-        delete [] ballwvol;
-        delete [] dvol;
-        delete [] ballwmean;
-        delete [] dmean;
-        delete [] ballwgauss;
-        delete [] dgauss;
-
-//        delcx.~DELCX();
-//        alfcx.~ALFCX();
-//        volumes.~VOLUMES();
+        delete [] coord; delete [] radii; delete [] coefS; delete [] coefV; delete [] coefM; delete [] coefG;
+        delete [] ballwsurf; delete [] dsurf; delete [] ballwvol; delete [] dvol;
+        delete [] ballwmean; delete [] dmean; delete [] ballwgauss; delete [] dgauss;
     });
-
 }
+
+
+
 
