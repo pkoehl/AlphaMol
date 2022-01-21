@@ -356,6 +356,7 @@ void DELCX::setup(int npoints, double *coord, double *radii, double *coefS, doub
 	If number of points is smaller than 4, add "bogus" points
  ==================================================================== */
 
+<<<<<<< HEAD
     if(npoints < 4) {
         int new_points = 4-npoints;
         double *bcoord = new double[3*new_points];
@@ -372,6 +373,24 @@ void DELCX::setup(int npoints, double *coord, double *radii, double *coefS, doub
         delete [] bcoord;
         delete [] brad;
     }
+=======
+	if(npoints < 4) {
+		int new_points = 4-npoints;
+		double *bcoord = new double[3*new_points];
+		double *brad   = new double[new_points];
+		addBogus(npoints, coord, radii, bcoord, brad); 
+		for(int i = 0; i < new_points; i++) {
+			x = bcoord[3*i]; y = bcoord[3*i+1]; z = bcoord[3*i+2];
+			r = brad[i]; c = 1.; d = 1; e = 1; f = 1;
+			Vertex vert(x, y, z, r, c, d, e, f);
+			vert.info[0] = 1;
+			vert.status = 0;
+			vertices.push_back(vert);
+		}
+		delete [] bcoord;
+		delete [] brad;
+	}
+>>>>>>> 6f6106ba520a95008943938bb177ecb333fad5fc
 
 /* ====================================================================
 	Initialisation:
