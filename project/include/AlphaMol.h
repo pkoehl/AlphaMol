@@ -30,7 +30,9 @@
 #include <limits>
 #include <bitset>
 #include <stack>
-
+#include "jlcxx/jlcxx.hpp"
+#include "jlcxx/array.hpp"
+#include "jlcxx/tuple.hpp"
 
 /* ===============================================================================================
    Local includes
