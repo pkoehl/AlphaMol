@@ -111,19 +111,6 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named AlphaMolStatic
-
-# Build rule for target.
-AlphaMolStatic: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 AlphaMolStatic
-.PHONY : AlphaMolStatic
-
-# fast build rule for target.
-AlphaMolStatic/fast:
-	$(MAKE) -f CMakeFiles/AlphaMolStatic.dir/build.make CMakeFiles/AlphaMolStatic.dir/build
-.PHONY : AlphaMolStatic/fast
-
-#=============================================================================
 # Target rules for targets named AlphaMol
 
 # Build rule for target.
@@ -142,7 +129,6 @@ project/src/AlphaMol.o: project/src/AlphaMol.cpp.o
 
 # target to build an object file
 project/src/AlphaMol.cpp.o:
-	$(MAKE) -f CMakeFiles/AlphaMolStatic.dir/build.make CMakeFiles/AlphaMolStatic.dir/project/src/AlphaMol.cpp.o
 	$(MAKE) -f CMakeFiles/AlphaMol.dir/build.make CMakeFiles/AlphaMol.dir/project/src/AlphaMol.cpp.o
 .PHONY : project/src/AlphaMol.cpp.o
 
@@ -152,7 +138,6 @@ project/src/AlphaMol.i: project/src/AlphaMol.cpp.i
 
 # target to preprocess a source file
 project/src/AlphaMol.cpp.i:
-	$(MAKE) -f CMakeFiles/AlphaMolStatic.dir/build.make CMakeFiles/AlphaMolStatic.dir/project/src/AlphaMol.cpp.i
 	$(MAKE) -f CMakeFiles/AlphaMol.dir/build.make CMakeFiles/AlphaMol.dir/project/src/AlphaMol.cpp.i
 .PHONY : project/src/AlphaMol.cpp.i
 
@@ -162,7 +147,6 @@ project/src/AlphaMol.s: project/src/AlphaMol.cpp.s
 
 # target to generate assembly for a file
 project/src/AlphaMol.cpp.s:
-	$(MAKE) -f CMakeFiles/AlphaMolStatic.dir/build.make CMakeFiles/AlphaMolStatic.dir/project/src/AlphaMol.cpp.s
 	$(MAKE) -f CMakeFiles/AlphaMol.dir/build.make CMakeFiles/AlphaMol.dir/project/src/AlphaMol.cpp.s
 .PHONY : project/src/AlphaMol.cpp.s
 
@@ -174,7 +158,6 @@ help:
 	@echo "... depend"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
-	@echo "... AlphaMolStatic"
 	@echo "... AlphaMol"
 	@echo "... project/src/AlphaMol.o"
 	@echo "... project/src/AlphaMol.i"
