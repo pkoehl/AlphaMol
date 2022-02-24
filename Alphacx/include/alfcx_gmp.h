@@ -1083,8 +1083,6 @@ void ALFCX_GMP::set_alf_gmp()
 
 void ALFCX_GMP::clear_alf_gmp()
 {
-
-<<<<<<< HEAD
     int i,j;
 
     mpz_clear(temp1); mpz_clear(temp2); mpz_clear(temp3);
@@ -1149,73 +1147,6 @@ void ALFCX_GMP::clear_alf_gmp()
     mpz_clear(Dabc);mpz_clear(Dabd); mpz_clear(Dacd); mpz_clear(Dbcd);
     mpz_clear(Dabcd);
     mpz_clear(alp);
-=======
-	int i,j;
-
-	mpz_clear(temp1); mpz_clear(temp2); mpz_clear(temp3);
-	mpz_clear(ra2); mpz_clear(rb2); mpz_clear(dist2);
-	mpz_clear(dtest);
-	mpz_clear (r_11); mpz_clear (r_22); mpz_clear (r_33);
-	mpz_clear (diff);
-	mpz_clear (det0);
-
-	for (i= 0; i < 4; i++)
-	{
-		for (j=0; j < 5; j++)
-		{
-			mpz_clear(res[i][j]);
-			mpz_clear(res2_c[i][j]);
-			mpz_clear(Mab[i][j]);
-			mpz_clear(Mac[i][j]);
-			mpz_clear(Mbc[i][j]);
-			mpz_clear(S[i][j]);
-			mpz_clear(T[i][j]);
-		}
-	}
-	
-	mpz_clear (r_14); mpz_clear (r_313); mpz_clear (r_212);
-	mpz_clear (det1); mpz_clear (det2); mpz_clear (det3); mpz_clear (det4); 
-	mpz_clear (wa); mpz_clear(wb); mpz_clear(wc); mpz_clear(wd);
-
-	for (i = 0; i < 5; i++) 
-	{
-		mpz_clear(a_mp[i]);
-		mpz_clear(b_mp[i]);
-		mpz_clear(c_mp[i]);
-		mpz_clear(d_mp[i]);
-		mpz_clear(Dab[i]);
-	}
-	mpz_clear(ra_mp);mpz_clear(rb_mp);
-	mpz_clear(rc_mp);mpz_clear(rd_mp);
-
-	mpz_clear (num); mpz_clear (den);
-
-	for (i=0; i < 4; i++)
-	{
-		mpz_clear(Sab[i]);
-		mpz_clear(Sac[i]);
-		mpz_clear(Sad[i]);
-		mpz_clear(Sbc[i]);
-		mpz_clear(Sbd[i]);
-		mpz_clear(Scd[i]);
-		mpz_clear(Tab[i]);
-		mpz_clear(Sa[i]);
-		mpz_clear(Sb[i]);
-		mpz_clear(Sc[i]);
-		mpz_clear(Sd[i]);
-		mpz_clear(Sam1[i]);
-		mpz_clear(Sbm1[i]);
-		mpz_clear(Scm1[i]);
-		mpz_clear(Sdm1[i]);
-		mpz_clear(Tc[i]);
-		mpz_clear(Deter[i]);
-	}
-
-	mpz_clear(Dabc);mpz_clear(Dabd); mpz_clear(Dacd); mpz_clear(Dbcd);
-	mpz_clear(Dabcd);
-	mpz_clear(alp);
->>>>>>> 6f6106ba520a95008943938bb177ecb333fad5fc
-
 }
 
 #endif

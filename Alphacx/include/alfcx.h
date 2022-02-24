@@ -1143,14 +1143,7 @@ void ALFCX::alfcx(double alpha, std::vector<Vertex>& vertices, std::vector<Tetra
     std::bitset<6> *tetra_mask = new std::bitset<6>[ntetra];
     std::bitset<6> zero(std::string("000000"));
 
-<<<<<<< HEAD
     for(int i = 0; i < ntetra; i++) tetra_mask[i] = zero;
-=======
-	std::bitset<6> *tetra_mask = new std::bitset<6>[ntetra];
-	std::bitset<6> zero(std::string("000000"));
-	  
-	for(int i = 0; i < ntetra; i++) tetra_mask[i] = zero;
->>>>>>> 6f6106ba520a95008943938bb177ecb333fad5fc
 
     for (int i = 0; i < ntetra; i++) {
         for(int j = 0; j < 5; j++) tetra[i].info[j+2] = 0;
@@ -1447,26 +1440,12 @@ void ALFCX::alfcx(double alpha, std::vector<Vertex>& vertices, std::vector<Tetra
 
         vertices[i].info[7] = 1;
     }
-/*
-	std::cout << std::endl;
-	std::cout << "Number of tetrahedra in Delaunay complex: " << ntet_del << std::endl;
-	std::cout << "Number of tetrahedra in Alpha complex   : " << ntet_alp << std::endl;
-	std::cout << "Number of triangles in Alpha complex    : " << ntrig << std::endl;
-	std::cout << "Number of edges in Alpha complex        : " << nedge << std::endl;
-	std::cout << "Number of vertices in Alpha complex     : " << nvert << std::endl;
-	std::cout << std::endl;
-*/
-<<<<<<< HEAD
+
     delete [] tetra_mask;
     alf_gmp.clear_alf_gmp();
 
 }
-=======
-	delete [] tetra_mask;
-	alf_gmp.clear_alf_gmp();
 
-  }
->>>>>>> 6f6106ba520a95008943938bb177ecb333fad5fc
 
 /* ============================================================================================
 	Given two vertices of a tetrahedron, find the index of the edge they form
