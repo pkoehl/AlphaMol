@@ -11,7 +11,6 @@ This code is distributed under the LGPL-LICENSE. See LGPL-LICENSE.txt for detail
 
 This section is a copy of the "Compiling the C++ code" section from [JuliaInterop/CxxWrap](https://github.com/JuliaInterop/CxxWrap.jl):
 
-## Compiling the C++ code
 The recommended way to compile the C++ code is to use CMake to discover `libcxxwrap-julia` and the Julia libraries.
 A full example is in the [`testlib` directory of `libcxxwrap-julia`](https://github.com/JuliaInterop/libcxxwrap-julia/tree/master/testlib-builder/src/testlib).
 The following sequence of commands can be used to build:
