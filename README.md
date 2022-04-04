@@ -28,7 +28,7 @@ This following is a copy of the "Compiling the C++ code" section from [JuliaInte
 >julia> CxxWrap.prefix_path()
 >```
 
-After building the Makefile using Cmake you can call ```make all``` to build the shared library called libAlphaMol.so
+After building the Makefile using Cmake you can call ```make all``` to build the shared library. When the build process is completed you should see a shared library file called libAlphaMol.so
 
 **4. Disclaimer**
 
