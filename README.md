@@ -1,30 +1,8 @@
-# AlphaMol
+# AlphaMolWrap
 
 # **1. Background**
-
-This package contains one program, AlphaMol, designed to 
-to compute geometric measures of a union of possibly overlapping
-balls.
-Those geometric measures include:
-- Accessible surface areas of each ball
-- Volumes of each ball
-- Mean curvature 
-- Gaussian curvature
-It also allows for computing the derivatives of those measures
-with respect to the coordinates of the centers of the ball.
-The contribution of each atom can be weighted independently for
-each geometric measure. Note that in the current version of the code, 
-those weights are all set to one, but this can easily be modified.
-
-The whole procedure is based on those two excellent papers:
-
-A. Akopyan and H. Edelsbrunner. The weighted mean curvature 
-derivative of a space-filling diagram. Comput. Math. Biophys. 8 (2020), 51-67
-[pdf](https://arxiv.org/abs/1908.06779)
-
-A. Akopyan and H. Edelsbrunner. The weighted Gaussian curvature 
-derivative of a space-filling diagram. Comput. Math. Biophys. 8 (2020), 74-88
-[pdf](https://arxiv.org/abs/1908.06777)
+Cancel changes
+This repository is a fork of {https://github.com/pkoehl/AlphaMol}[pkoehl/AlphaMol] which is
 
 # **2. The Program: License**
 
@@ -33,7 +11,7 @@ subroutines, under the LGPL licensing code. Please read the text of
 the license (LGPL-LICENSE.txt provided with the distribution). 
 Basically, you are allowed to use and modify this code freely. 
 You are also allowed to distribute it, provided that you provide 
-the source code for all functions involded in ALphamol.
+the source code for all functions involded in Alphamol.
 
 # **3. The Program: Content**
 
