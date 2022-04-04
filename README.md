@@ -1,7 +1,7 @@
 # AlphaMolWrap
 
 # **1. Background**
-This repository is a fork of [pkoehl/AlphaMol](https://github.com/pkoehl/AlphaMol) and wraps the C++ source code provided there using [JuliaInterop/CxxWrap](https://github.com/JuliaInterop/CxxWrap.jl). 
+This repository is a fork of [pkoehl/AlphaMol](https://github.com/pkoehl/AlphaMol) and wraps the C++ source code provided there using [JuliaInterop/CxxWrap](https://github.com/JuliaInterop/CxxWrap.jl). There are some minor changes to the C++ source code but all functionality from the C++ side is exposed to the Julia side. 
 
 # **2. License**
 
@@ -29,8 +29,3 @@ This following is a copy of the "Compiling the C++ code" section from [JuliaInte
 >```
 
 After building the Makefile using Cmake you can call ```make all``` to build the shared library. When the build process is completed you should see a shared library file called libAlphaMol.so
-
-**4. Disclaimer**
-
-The program is provided "as is". Contact koehl@cs.ucdavis.edu
-if you have any problems with the C++ source code. Contact spirandelli@uni-potsdam.de if you have any questions regarding the wrapping. 
